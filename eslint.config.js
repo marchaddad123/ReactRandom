@@ -19,7 +19,6 @@ export default defineConfig([
         ".env.*",
         "!.env.example"
     ]),
-    prettierRecommended,
     {
         files: ["**/*.{js,mjs,cjs,ts,tsx}"],
         extends: [
@@ -36,14 +35,14 @@ export default defineConfig([
             "no-console":
                 process.env.NODE_ENV === "production" ? "warn" : "off",
             "no-debugger":
-                process.env.NODE_ENV === "production" ? "warn" : "off",
-            "prettier/prettier": ["error", {}, { usePrettierrc: true }]
+                process.env.NODE_ENV === "production" ? "warn" : "off"
         }
     },
     {
-        files: ["*.config.{js,mjs,cjs,ts}", "eslint.config.js"],
+        files: ["**/*.config.{js,mjs,cjs,ts}", "eslint.config.js"],
         languageOptions: {
             globals: globals.node
         }
-    }
+    },
+    prettierRecommended
 ])
