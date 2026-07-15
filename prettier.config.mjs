@@ -10,6 +10,7 @@ export default {
     singleAttributePerLine: true,
     bracketSpacing: true,
     bracketSameLine: false,
+    plugins: ["prettier-plugin-tailwindcss"],
     overrides: [
         {
             files: "*.md",
