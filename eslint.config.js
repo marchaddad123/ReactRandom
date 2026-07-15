@@ -44,5 +44,12 @@ export default defineConfig([
             globals: globals.node
         }
     },
+    {
+        // Context modules commonly export both Provider and useX hooks.
+        files: ["src/store/**/*.{ts,tsx}"],
+        rules: {
+            "react-refresh/only-export-components": "off"
+        }
+    },
     prettierRecommended
 ])

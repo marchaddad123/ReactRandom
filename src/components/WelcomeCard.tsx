@@ -1,31 +1,29 @@
 import { debounce } from "lodash-es"
 import { type ChangeEvent, useEffect, useMemo, useState } from "react"
+import { useLearner } from "../store/LearnerContext"
 
 type WelcomeCardProps = {
-    name: string
     currentStack: string
-    // Similar to Vue: emit('nameChange', value)
-    onNameChange: (name: string) => void
 }
 
-export function WelcomeCard({
-    name,
-    currentStack,
-    onNameChange
-}: WelcomeCardProps) {
-    // Local draft so typing stays snappy while the parent update is debounced.
+export function WelcomeCard({ currentStack }: WelcomeCardProps) {
+    // Read/write shared store — no props needed for name anymore.
+    // Similar to: const learnerStore = useLearnerStore()
+    const { name, setName } = useLearner()
+
+    // Local draft so typing stays snappy while the store update is debounced.
     const [draft, setDraft] = useState(name)
     const [previousName, setPreviousName] = useState(name)
 
-    // Keep local draft in sync if the parent changes `name` from elsewhere.
+    // Keep local draft in sync if something else changes `name` in the store.
     if (name !== previousName) {
         setPreviousName(name)
         setDraft(name)
     }
 
     const emitNameChange = useMemo(
-        () => debounce((nextName: string) => onNameChange(nextName), 300),
-        [onNameChange]
+        () => debounce((nextName: string) => setName(nextName), 300),
+        [setName]
     )
 
     useEffect(() => {
@@ -45,13 +43,13 @@ export function WelcomeCard({
             <p className="eyebrow">React + TypeScript + Tailwind</p>
             <h1>Welcome, {name || "Vue developer"}</h1>
             <p>
-                You already know {currentStack}. This small project shows the
-                React equivalents of props, reactive state, derived values, and
-                events.
+                You already know {currentStack}. This card reads{" "}
+                <code>name</code> from <code>LearnerContext</code> instead of
+                props.
             </p>
 
             <label htmlFor="welcome-name">
-                Name from child (debounced emit)
+                Name from child (debounced store update)
             </label>
             <input
                 id="welcome-name"
@@ -60,10 +58,9 @@ export function WelcomeCard({
                 placeholder="Type here in the child"
             />
             <p className="hint">
-                In Vue you&apos;d{" "}
-                <code>emit(&apos;nameChange&apos;, value)</code>. In React you
-                call a callback prop like <code>onNameChange(value)</code>.
-                Debounce comes from <code>lodash-es</code>.
+                Before: callback prop like <code>onNameChange</code>. Now:
+                update the shared context with <code>setName</code> (still
+                debounced).
             </p>
         </section>
     )

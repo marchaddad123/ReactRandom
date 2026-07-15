@@ -1,13 +1,13 @@
 import { type ChangeEvent, useEffect, useRef, useState } from "react"
 import "./App.css"
 import { WelcomeCard } from "./components/WelcomeCard"
+import { useLearner } from "./store/LearnerContext"
+import { useTheme } from "./store/ThemeContext"
 
 function App() {
-    // Similar to: const name = ref('Mark')
-    const [name, setName] = useState("Mark")
-
-    // Similar to: const count = ref(0)
-    const [count, setCount] = useState(0)
+    // From LearnerContext — similar to useLearnerStore() in Pinia.
+    const { name, setName, count, incrementCount, resetCount } = useLearner()
+    const { theme, toggleTheme } = useTheme()
 
     // For a simple derived value, React usually calculates it during render.
     // Similar to a very basic Vue computed value.
@@ -38,22 +38,15 @@ function App() {
         setName(event.target.value)
     }
 
-    function incrementCount() {
-        setCount((currentCount) => currentCount + 1)
-    }
-
-    function resetCount() {
-        setCount(0)
-    }
+    const themeBadgeClass =
+        theme === "sky"
+            ? "bg-sky-50 text-sky-800"
+            : "bg-emerald-50 text-emerald-800"
 
     return (
         <main className="app">
             <h1>Learn React</h1>
-            <WelcomeCard
-                name={name}
-                currentStack="Vue and Nuxt"
-                onNameChange={setName}
-            />
+            <WelcomeCard currentStack="Vue and Nuxt" />
 
             <section className="card">
                 <h2>1. State and input (parent)</h2>
@@ -65,10 +58,9 @@ function App() {
                     placeholder="Enter your name"
                 />
                 <p className="hint">
-                    This input updates parent state immediately (
-                    <code>value</code> + <code>onChange</code>, like Vue{" "}
-                    <code>v-model</code>). The child above emits the same state
-                    with a 300ms debounce.
+                    <code>name</code> now lives in <code>LearnerContext</code>{" "}
+                    (shared store), not only in local <code>useState</code>{" "}
+                    inside this file.
                 </p>
                 <p>
                     <span className="font-medium text-sky-600">{name}</span> is
@@ -106,21 +98,35 @@ function App() {
 
             <section className="rounded-xl border border-slate-200 bg-white p-6">
                 <p className="mb-2 text-sm font-semibold tracking-wide text-sky-600 uppercase">
-                    Tailwind CSS
+                    Context stores
                 </p>
                 <h2 className="mb-2 text-lg font-semibold text-slate-900">
-                    3. Utilities alongside CSS
+                    3. Multiple contexts
                 </h2>
                 <p className="mb-4 text-slate-600">
-                    Existing styles still come from{" "}
+                    Yes — you can have many Contexts. This app uses{" "}
                     <code className="rounded bg-slate-100 px-1.5 py-0.5">
-                        App.css
+                        LearnerContext
+                    </code>{" "}
+                    and{" "}
+                    <code className="rounded bg-slate-100 px-1.5 py-0.5">
+                        ThemeContext
                     </code>
-                    . This section is styled with Tailwind utilities.
+                    .
                 </p>
-                <p className="inline-flex rounded-lg bg-sky-50 px-3 py-2 text-sm font-medium text-sky-800">
-                    Hello from Tailwind v4
-                </p>
+                <div className="flex flex-wrap items-center gap-3">
+                    <p
+                        className={`inline-flex rounded-lg px-3 py-2 text-sm font-medium ${themeBadgeClass}`}
+                    >
+                        Theme: {theme}
+                    </p>
+                    <button
+                        type="button"
+                        onClick={toggleTheme}
+                    >
+                        Toggle theme context
+                    </button>
+                </div>
             </section>
         </main>
     )
