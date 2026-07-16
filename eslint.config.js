@@ -35,13 +35,34 @@ export default defineConfig([
             "no-console":
                 process.env.NODE_ENV === "production" ? "warn" : "off",
             "no-debugger":
-                process.env.NODE_ENV === "production" ? "warn" : "off"
+                process.env.NODE_ENV === "production" ? "warn" : "off",
+            // Keep components/functions split — similar to a team size budget.
+            "max-lines-per-function": [
+                "error",
+                {
+                    max: 300,
+                    skipBlankLines: true,
+                    skipComments: true
+                }
+            ],
+            "max-lines": [
+                "error",
+                {
+                    max: 300,
+                    skipBlankLines: true,
+                    skipComments: true
+                }
+            ]
         }
     },
     {
         files: ["**/*.config.{js,mjs,cjs,ts}", "eslint.config.js"],
         languageOptions: {
             globals: globals.node
+        },
+        rules: {
+            "max-lines": "off",
+            "max-lines-per-function": "off"
         }
     },
     {

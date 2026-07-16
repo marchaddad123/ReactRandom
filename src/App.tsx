@@ -3,6 +3,7 @@ import { NavLink, useLocation } from "react-router-dom"
 import "./App.css"
 import { ComparePage } from "./pages/ComparePage"
 import { CounterPage } from "./pages/CounterPage"
+import { FetchPage } from "./pages/FetchPage"
 import { HomePage } from "./pages/HomePage"
 import { NotesPage } from "./pages/NotesPage"
 
@@ -10,7 +11,8 @@ const routes = [
     { path: "/", label: "Home", element: <HomePage /> },
     { path: "/notes", label: "Notes", element: <NotesPage /> },
     { path: "/counter", label: "Counter", element: <CounterPage /> },
-    { path: "/compare", label: "Compare", element: <ComparePage /> }
+    { path: "/compare", label: "Compare", element: <ComparePage /> },
+    { path: "/fetch", label: "Fetch", element: <FetchPage /> }
 ] as const
 
 function App() {
