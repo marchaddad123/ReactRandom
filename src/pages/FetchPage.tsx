@@ -1,39 +1,29 @@
-import { useQuery } from "@tanstack/react-query"
-import { sendRequest } from "../lib/request"
-
-type Todo = {
-    userId: number
-    id: number
-    title: string
-    completed: boolean
-}
-
-async function fetchTodo(id: number): Promise<Todo> {
-    const { status, responseData } = await sendRequest<Todo>(`/todos/${id}`)
-
-    if (status >= 400 || !responseData) {
-        throw new Error(`Request failed: ${status}`)
-    }
-
-    return responseData
-}
+import { useTodo } from "../hooks/useTodo"
 
 export function FetchPage() {
-    // Similar to Nuxt: const { data, pending, error, refresh } = await useFetch(...)
-    const { data, error, isPending, isFetching, refetch, dataUpdatedAt } =
-        useQuery({
-            queryKey: ["todo", 1],
-            queryFn: () => fetchTodo(1)
-        })
+    // Page stays thin: all fetch + query + extras live in useTodo.
+    // Flow: useTodo → useQuery → getTodo → sendRequest
+    const {
+        data,
+        error,
+        isPending,
+        isFetching,
+        refetch,
+        dataUpdatedAt,
+        titleUpper,
+        isDone,
+        label
+    } = useTodo(1)
 
     return (
         <section className="card">
-            <p className="eyebrow">TanStack Query</p>
+            <p className="eyebrow">Custom hook + sendRequest</p>
             <h2>Server state (like useFetch)</h2>
             <p className="hint">
-                Vue/Nuxt: <code>useFetch</code> / <code>$fetch</code>. React:
-                <code>sendRequest</code> (shared fetch helper) +{" "}
-                <code>useQuery</code> for cache, loading, and refetch.
+                No OpenAPI required. Flow: <code>useTodo(1)</code> →{" "}
+                <code>useQuery</code> → <code>getTodo</code> →{" "}
+                <code>sendRequest</code>. The hook can also return extras like{" "}
+                <code>titleUpper</code> / <code>isDone</code>.
             </p>
 
             <div className="actions">
@@ -59,12 +49,16 @@ export function FetchPage() {
 
             {data ? (
                 <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="hint">{label}</p>
                     <p>
                         <span className="font-semibold">#{data.id}</span>{" "}
                         {data.title}
                     </p>
                     <p className="hint">
-                        Completed: <code>{String(data.completed)}</code>
+                        Upper: <code>{titleUpper}</code>
+                    </p>
+                    <p className="hint">
+                        Done: <code>{String(isDone)}</code>
                     </p>
                     <p className="hint">
                         Cached — leave this page and come back within 30s and it

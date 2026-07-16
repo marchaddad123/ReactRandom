@@ -97,6 +97,34 @@ button.secondary:hover {
     background: #cbd5e1;
 }
 
+/* Let Tailwind-driven pages own their button styles */
+.todos-page button {
+    padding: 0;
+    color: inherit;
+    background: transparent;
+    border-radius: 0;
+    font-weight: inherit;
+}
+
+.todos-page button:hover {
+    background: transparent;
+}
+
+/* Notification dismiss must not inherit the global blue button */
+.notifications-stack button.notification-dismiss {
+    padding: 0;
+    color: #6b7280;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    font-weight: inherit;
+}
+
+.notifications-stack button.notification-dismiss:hover {
+    color: #111827;
+    background: transparent;
+}
+
 code {
     padding: 0.1rem 0.3rem;
     background: #f1f5f9;

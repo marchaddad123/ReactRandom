@@ -29,3 +29,97 @@ button,
 input {
     font: inherit;
 }
+
+/*
+ * Exact Nuxt notification stack:
+ * fixed right-4 top-[4.5rem] sm:right-8
+ */
+.notifications-stack {
+    pointer-events: none;
+    position: fixed;
+    top: 4.5rem;
+    right: 1rem;
+    z-index: 1000;
+    display: flex;
+    width: auto;
+    max-width: 24rem;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+    .notifications-stack {
+        right: 2rem;
+        max-width: 28rem;
+    }
+}
+
+.notifications-stack--align-content {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.notifications-stack button.notification-dismiss {
+    padding: 0;
+    color: #6b7280;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    font-weight: inherit;
+    cursor: pointer;
+}
+
+.notifications-stack button.notification-dismiss:hover {
+    color: #111827;
+    background: transparent;
+}
+
+/*
+ * Vue transition-group name="notification"
+ * fade + slide in, then fade + slide out
+ */
+.notification-card {
+    /* Keep a stable intrinsic width so absolute leave doesn't collapse text */
+    width: max-content;
+    max-width: min(24rem, calc(100vw - 2rem));
+    flex-shrink: 0;
+}
+
+.notification-enter-active,
+.notification-exit-active {
+    transition:
+        opacity 300ms ease-in-out,
+        transform 300ms ease-in-out;
+}
+
+.notification-enter {
+    opacity: 0;
+    transform: translateX(1rem);
+}
+
+.notification-enter-active {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.notification-exit {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.notification-exit-active {
+    position: absolute;
+    top: 0;
+    right: 0;
+    /* Same width rules as the card — prevents column reflow while leaving */
+    width: max-content;
+    max-width: min(24rem, calc(100vw - 2rem));
+    opacity: 0;
+    transform: translateX(1rem);
+}
+
+.notification-move {
+    transition: transform 300ms ease-in-out;
+}

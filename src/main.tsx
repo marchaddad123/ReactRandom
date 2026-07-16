@@ -6,16 +6,18 @@ import App from "./App.tsx"
 import "./index.css"
 import { queryClient } from "./lib/queryClient"
 import { LearnerProvider } from "./store/LearnerContext"
+import { NotificationProvider } from "./store/NotificationContext"
 import { ThemeProvider } from "./store/ThemeContext"
 
 createRoot(document.getElementById("root")!).render(
     <StrictMode>
         <QueryClientProvider client={queryClient}>
             <BrowserRouter>
-                {/* Multiple providers = multiple contexts. Nest them like Vue plugins. */}
                 <ThemeProvider>
                     <LearnerProvider>
-                        <App />
+                        <NotificationProvider>
+                            <App />
+                        </NotificationProvider>
                     </LearnerProvider>
                 </ThemeProvider>
             </BrowserRouter>
