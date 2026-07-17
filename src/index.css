@@ -22,6 +22,9 @@
 
     --animate-rise: rise 0.45s ease-out both;
     --animate-nav: nav-in 0.4s ease-out both;
+
+    /* Nuxt Modal slide easing */
+    --ease-modal-cubic: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 @keyframes rise {
@@ -95,6 +98,35 @@
     code {
         @apply bg-tertiary/80 text-ink rounded px-1.5 py-0.5 text-[0.9em];
     }
+}
+
+/* Nuxt DialogUI / Modal body lock */
+html {
+    scrollbar-gutter: stable;
+}
+
+html:has([data-dialog-ui]),
+html:has([data-modal-ui]) {
+    overflow: hidden;
+    overscroll-behavior: none;
+}
+
+.removeOverflow {
+    overflow: unset !important;
+}
+
+.is_animating {
+    transition-property: all;
+    transition-duration: 200ms;
+    transition-timing-function: ease-out;
+}
+
+.scrollbar-none {
+    scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+    display: none;
 }
 
 /*
