@@ -6,6 +6,11 @@ import {
     useState
 } from "react"
 
+/**
+ * LEGACY / REFERENCE — app now uses Zustand (`useLearnerStore.ts`).
+ * Kept so you can compare Context vs Zustand side by side.
+ */
+
 type LearnerContextValue = {
     name: string
     setName: (name: string) => void

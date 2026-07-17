@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { type FormEvent, useState } from "react"
 import { addTodo, clearTodos, deleteTodo, listTodos } from "../lib/todoStorage"
-import { useNotifications } from "../store/NotificationContext"
+import { useNotificationStore } from "../store/useNotificationStore"
 
 // This name is like a label on a box in the cache.
 // React Query uses it to find "our todo list" later.
@@ -17,7 +17,9 @@ export function TodosPage() {
     const queryClient = useQueryClient()
 
     // Shows the little popup messages (green = good, red = bad).
-    const { updateNotification } = useNotifications()
+    const updateNotification = useNotificationStore(
+        (state) => state.updateNotification
+    )
 
     // What the user typed in the input box.
     const [title, setTitle] = useState("")

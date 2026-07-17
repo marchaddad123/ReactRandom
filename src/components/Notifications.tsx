@@ -8,8 +8,8 @@ import { useRef, type ComponentProps } from "react"
 import { CSSTransition, TransitionGroup } from "react-transition-group"
 import {
     type Notification,
-    useNotifications
-} from "../store/NotificationContext"
+    useNotificationStore
+} from "../store/useNotificationStore"
 
 type NotificationsProps = {
     alignToContent?: boolean
@@ -67,7 +67,7 @@ function NotificationTransition({
 }
 
 export function Notifications({ alignToContent = false }: NotificationsProps) {
-    const { notifications, removeNotification } = useNotifications()
+    const { notifications, removeNotification } = useNotificationStore()
 
     return (
         <TransitionGroup

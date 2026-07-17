@@ -8,6 +8,11 @@ import {
     useState
 } from "react"
 
+/**
+ * LEGACY / REFERENCE — app now uses Zustand (`useNotificationStore.ts`).
+ * Kept so you can compare Context vs Zustand side by side.
+ */
+
 export type NotificationInput = {
     message: string
     /** true = error, false = success, omitted/undefined = info */

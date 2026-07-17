@@ -1,11 +1,13 @@
 import { type ChangeEvent, useEffect, useRef, useState } from "react"
 import { WelcomeCard } from "../components/WelcomeCard"
-import { useLearner } from "../store/LearnerContext"
-import { useTheme } from "../store/ThemeContext"
+import { useLearnerStore } from "../store/useLearnerStore"
+import { useThemeStore } from "../store/useThemeStore"
 
 export function HomePage() {
-    const { name, setName, count, incrementCount, resetCount } = useLearner()
-    const { theme, toggleTheme } = useTheme()
+    // Zustand: pick what you need (like storeToRefs / Pinia).
+    const { name, setName, count, incrementCount, resetCount } =
+        useLearnerStore()
+    const { theme, toggleTheme } = useThemeStore()
 
     const doubledCount = count * 2
 
@@ -50,9 +52,9 @@ export function HomePage() {
                     placeholder="Enter your name"
                 />
                 <p className="hint">
-                    <code>name</code> now lives in <code>LearnerContext</code>{" "}
-                    (shared store), not only in local <code>useState</code>{" "}
-                    inside this file.
+                    <code>name</code> lives in <code>useLearnerStore</code>{" "}
+                    (Zustand — like Pinia). Old Context files are still in{" "}
+                    <code>src/store/*Context.tsx</code> for comparison.
                 </p>
                 <p>
                     <span className="font-medium text-sky-600">{name}</span> is
@@ -90,21 +92,21 @@ export function HomePage() {
 
             <section className="rounded-xl border border-slate-200 bg-white p-6">
                 <p className="mb-2 text-sm font-semibold tracking-wide text-sky-600 uppercase">
-                    Context stores
+                    Zustand stores
                 </p>
                 <h2 className="mb-2 text-lg font-semibold text-slate-900">
-                    3. Multiple contexts
+                    3. Multiple stores (no Provider)
                 </h2>
                 <p className="mb-4 text-slate-600">
-                    Yes — you can have many Contexts. This app uses{" "}
+                    App uses{" "}
                     <code className="rounded bg-slate-100 px-1.5 py-0.5">
-                        LearnerContext
+                        useLearnerStore
                     </code>{" "}
                     and{" "}
                     <code className="rounded bg-slate-100 px-1.5 py-0.5">
-                        ThemeContext
+                        useThemeStore
                     </code>
-                    .
+                    . No wrapping in <code>main.tsx</code>.
                 </p>
                 <div className="flex flex-wrap items-center gap-3">
                     <p
@@ -116,7 +118,7 @@ export function HomePage() {
                         type="button"
                         onClick={toggleTheme}
                     >
-                        Toggle theme context
+                        Toggle theme store
                     </button>
                 </div>
             </section>

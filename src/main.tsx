@@ -5,21 +5,13 @@ import { BrowserRouter } from "react-router-dom"
 import App from "./App.tsx"
 import "./index.css"
 import { queryClient } from "./lib/queryClient"
-import { LearnerProvider } from "./store/LearnerContext"
-import { NotificationProvider } from "./store/NotificationContext"
-import { ThemeProvider } from "./store/ThemeContext"
 
 createRoot(document.getElementById("root")!).render(
     <StrictMode>
+        {/* Zustand stores need no Provider — Context* files are kept as reference. */}
         <QueryClientProvider client={queryClient}>
             <BrowserRouter>
-                <ThemeProvider>
-                    <LearnerProvider>
-                        <NotificationProvider>
-                            <App />
-                        </NotificationProvider>
-                    </LearnerProvider>
-                </ThemeProvider>
+                <App />
             </BrowserRouter>
         </QueryClientProvider>
     </StrictMode>
