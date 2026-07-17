@@ -26,6 +26,7 @@ export const ui = {
         "bg-secondary text-secondary-fg hover:enabled:bg-secondary/90",
     btnTertiary:
         "border-line bg-tertiary text-tertiary-fg hover:enabled:bg-tertiary/80",
+    btnDanger: "bg-danger text-white hover:enabled:bg-danger/90",
     navLink:
         "inline-flex items-center rounded-full border border-transparent px-3.5 py-2 text-[0.85rem] font-semibold no-underline transition-[background,color,border-color]",
     navLinkInactive: "text-secondary hover:bg-tertiary hover:text-ink",

@@ -1,10 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useFormContext, useWatch } from "react-hook-form"
 import { updateUserReport } from "../api/users"
 import { USERS_QUERY_KEY } from "../lib/usersQuery"
 import { cx, ui } from "../lib/ui"
 import { useLearnerStore } from "../store/useLearnerStore"
 import { useNotificationStore } from "../store/useNotificationStore"
-import { selectIsReportModified, useUsersStore } from "../store/useUsersStore"
 import type { Report } from "../types/report"
 import type { User } from "../types/user"
 
@@ -66,29 +66,65 @@ export function UserList({
     )
 }
 
-export function UserReportEditor() {
-    const report = useUsersStore((state) => state.report)
-    const userId = useUsersStore((state) => state.selectedUserId)
-    const userName = useUsersStore((state) => state.selectedUserName)
-    const isReportModified = useUsersStore(selectIsReportModified)
-    const patchReport = useUsersStore((state) => state.patchReport)
-    const syncBaseline = useUsersStore((state) => state.syncBaseline)
+export function UserReportEditor({
+    userId,
+    userName
+}: {
+    userId: string | null
+    userName: string | null
+}) {
     const incrementCount = useLearnerStore((state) => state.incrementCount)
     const updateNotification = useNotificationStore(
         (state) => state.updateNotification
     )
     const queryClient = useQueryClient()
 
+    /*
+     * STEP 5 — open the shared notebook
+     * useFormContext = "give me the form from FormProvider above"
+     *   (we did NOT call useForm again here)
+     *
+     * register("path") = glue this <input> to one field in the notebook
+     * handleSubmit     = when the form submits, gather all values safely
+     * reset            = set a new "clean starting page"
+     * isDirty          = true after any change vs that starting page
+     */
+    const {
+        register,
+        handleSubmit,
+        reset,
+        control,
+        formState: { isDirty, isSubmitting }
+    } = useFormContext<Report>()
+
+    /*
+     * STEP 6 — peek at some pages while typing
+     * useWatch = "tell me when filters/sections change so the list can update"
+     * (register alone updates the notebook; watch makes THIS screen re-render)
+     */
+    const filters = useWatch({ control, name: "filters" })
+    const sections = useWatch({ control, name: "sections" })
+
+    /*
+     * STEP 7 — Save to API
+     * handleSubmit gives us the full Report object from the notebook.
+     * We send THAT to the server. We do not read Zustand for the report.
+     */
     const saveMutation = useMutation({
-        mutationFn: () => {
-            if (!userId || !report) {
-                throw new Error("Nothing to save")
-            }
+        mutationFn: (report: Report) => {
+            if (!userId) throw new Error("Nothing to save")
             return updateUserReport(userId, report)
         },
-        onSuccess: (user) => {
+        onSuccess: (user, report) => {
+            // Refresh the users list in React Query (server truth)
             void queryClient.invalidateQueries({ queryKey: USERS_QUERY_KEY })
-            syncBaseline()
+
+            /*
+             * STEP 8 — after a good save
+             * reset(report) = "this saved version is the new clean starting page"
+             * → isDirty becomes false → Save button turns off again
+             */
+            reset(report)
             updateNotification({
                 message: `Saved report for ${user.name}`,
                 error: false
@@ -102,7 +138,7 @@ export function UserReportEditor() {
         }
     })
 
-    if (!report || !userId) {
+    if (!userId) {
         return (
             <div
                 className={cx(
@@ -117,22 +153,32 @@ export function UserReportEditor() {
         )
     }
 
+    const activeFilters = filters ?? {
+        showDone: true,
+        showDraft: true,
+        query: ""
+    }
+
     return (
-        <div className="space-y-4">
+        <form
+            className="space-y-4"
+            // handleSubmit runs our function with all notebook values
+            onSubmit={handleSubmit((values) => saveMutation.mutate(values))}
+        >
             <div className="flex flex-wrap items-end justify-between gap-3">
                 <div>
-                    <p className={ui.eyebrow}>useUsersStore</p>
+                    <p className={ui.eyebrow}>React Hook Form</p>
                     <h3 className="font-display text-ink m-0 text-lg leading-snug">
                         {userName}
                     </h3>
-                    {/* Always render — invisible when clean — avoids CLS */}
+                    {/* Keep space even when clean so the layout does not jump */}
                     <p
                         className={cx(
                             "mt-1 text-xs",
-                            isReportModified ? "text-muted" : "invisible"
+                            isDirty ? "text-muted" : "invisible"
                         )}
                     >
-                        Modified vs last saved — Save to push to the API
+                        formState.isDirty — Save to push to the API
                     </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -143,27 +189,29 @@ export function UserReportEditor() {
                     >
                         Bump learner count
                     </button>
+                    {/* Save stays off until something really changed (isDirty) */}
                     <button
-                        type="button"
+                        type="submit"
                         className={cx(ui.btn, ui.btnPrimary, "min-w-28")}
-                        disabled={!isReportModified || saveMutation.isPending}
-                        onClick={() => saveMutation.mutate()}
+                        disabled={
+                            !isDirty || isSubmitting || saveMutation.isPending
+                        }
                     >
                         {saveMutation.isPending ? "Saving…" : "Save to API"}
                     </button>
                 </div>
             </div>
 
+            {/*
+              STEP 9 — register
+              {...register("meta.title")} wires this box to report.meta.title
+              Dot paths = nested objects. No useState needed for each field.
+            */}
             <label className={ui.fieldLabel}>
                 Meta title
                 <input
                     className={ui.field}
-                    value={report.meta.title}
-                    onChange={(event) =>
-                        patchReport((r) => {
-                            r.meta.title = event.target.value
-                        })
-                    }
+                    {...register("meta.title")}
                 />
             </label>
 
@@ -171,13 +219,8 @@ export function UserReportEditor() {
                 Filter query
                 <input
                     className={ui.field}
-                    value={report.filters.query}
                     placeholder="Filter by label or note…"
-                    onChange={(event) =>
-                        patchReport((r) => {
-                            r.filters.query = event.target.value
-                        })
-                    }
+                    {...register("filters.query")}
                 />
             </label>
 
@@ -185,76 +228,53 @@ export function UserReportEditor() {
                 <label className="flex items-center gap-2">
                     <input
                         type="checkbox"
-                        checked={report.filters.showDone}
-                        onChange={(event) =>
-                            patchReport((r) => {
-                                r.filters.showDone = event.target.checked
-                            })
-                        }
+                        {...register("filters.showDone")}
                     />
                     Show done (checked)
                 </label>
                 <label className="flex items-center gap-2">
                     <input
                         type="checkbox"
-                        checked={report.filters.showDraft}
-                        onChange={(event) =>
-                            patchReport((r) => {
-                                r.filters.showDraft = event.target.checked
-                            })
-                        }
+                        {...register("filters.showDraft")}
                     />
                     Show draft (unchecked)
                 </label>
             </div>
 
             <div className="space-y-4">
-                {report.sections.map((section) => {
-                    const visibleRows = section.rows.filter((row) =>
-                        rowVisible(row, report.filters)
-                    )
+                {(sections ?? []).map((section, sectionIndex) => {
+                    const rowsToShow = section.rows
+                        .map((row, rowIndex) => ({ row, rowIndex }))
+                        .filter(({ row }) => rowVisible(row, activeFilters))
 
                     return (
                         <div key={section.id}>
                             <p className="text-ink mb-2 text-sm font-semibold">
                                 {section.name}
                                 <span className="text-muted ml-2 font-normal">
-                                    {visibleRows.length}/{section.rows.length}
+                                    {rowsToShow.length}/{section.rows.length}
                                 </span>
                             </p>
-                            {visibleRows.length === 0 ? (
+                            {rowsToShow.length === 0 ? (
                                 <p className="text-muted m-0 text-sm">
                                     No rows match the filters.
                                 </p>
                             ) : (
                                 <ul className="m-0 list-none space-y-2 p-0">
-                                    {visibleRows.map((row) => (
+                                    {rowsToShow.map(({ row, rowIndex }) => (
                                         <li
                                             key={row.id}
                                             className="border-line bg-surface flex flex-wrap items-center gap-3 rounded-md border px-3 py-3"
                                         >
+                                            {/*
+                                              Nested path with numbers:
+                                              sections[0].rows[3].checked
+                                            */}
                                             <input
                                                 type="checkbox"
-                                                checked={row.checked}
-                                                onChange={(event) =>
-                                                    patchReport((r) => {
-                                                        const target =
-                                                            r.sections
-                                                                .flatMap(
-                                                                    (s) =>
-                                                                        s.rows
-                                                                )
-                                                                .find(
-                                                                    (item) =>
-                                                                        item.id ===
-                                                                        row.id
-                                                                )
-                                                        if (target) {
-                                                            target.checked =
-                                                                event.target.checked
-                                                        }
-                                                    })
-                                                }
+                                                {...register(
+                                                    `sections.${sectionIndex}.rows.${rowIndex}.checked`
+                                                )}
                                             />
                                             <span className="min-w-24 text-sm">
                                                 {row.label}
@@ -264,27 +284,10 @@ export function UserReportEditor() {
                                                     ui.field,
                                                     "!mt-0 min-w-0 flex-1"
                                                 )}
-                                                value={row.note}
                                                 placeholder="note…"
-                                                onChange={(event) =>
-                                                    patchReport((r) => {
-                                                        const target =
-                                                            r.sections
-                                                                .flatMap(
-                                                                    (s) =>
-                                                                        s.rows
-                                                                )
-                                                                .find(
-                                                                    (item) =>
-                                                                        item.id ===
-                                                                        row.id
-                                                                )
-                                                        if (target) {
-                                                            target.note =
-                                                                event.target.value
-                                                        }
-                                                    })
-                                                }
+                                                {...register(
+                                                    `sections.${sectionIndex}.rows.${rowIndex}.note`
+                                                )}
                                             />
                                         </li>
                                     ))}
@@ -294,6 +297,6 @@ export function UserReportEditor() {
                     )
                 })}
             </div>
-        </div>
+        </form>
     )
 }

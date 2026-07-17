@@ -1,55 +1,95 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { UserList, UserReportEditor } from "../components/UserReportEditor"
+import { useQuery } from "@tanstack/react-query"
+import { useState } from "react"
+import { FormProvider, useForm } from "react-hook-form"
+import { listUsers } from "../api/users"
 import {
     NarrowNameSubscriber,
-    NarrowUsersSubscriber,
+    NarrowReportFormSubscriber,
     WideLearnerSubscriber
 } from "../components/ReportSubscribers"
+import { UserList, UserReportEditor } from "../components/UserReportEditor"
 import { USERS_QUERY_KEY } from "../lib/usersQuery"
 import { cx, ui } from "../lib/ui"
-import { listUsers } from "../api/users"
-import { selectIsReportModified, useUsersStore } from "../store/useUsersStore"
+import type { Report } from "../types/report"
 import type { User } from "../types/user"
 
 export function ReportPage() {
-    const queryClient = useQueryClient()
-    const selectUser = useUsersStore((state) => state.selectUser)
-    const selectedId = useUsersStore((state) => state.selectedUserId)
-    const isReportModified = useUsersStore(selectIsReportModified)
+    const [selectedId, setSelectedId] = useState<string | null>(null)
 
     const { data: users = [], isPending } = useQuery({
         queryKey: USERS_QUERY_KEY,
         queryFn: listUsers
     })
 
+    // On render: keep the chosen id if it still exists, otherwise the first user.
+    const selectedUser =
+        users.find((user) => user.id === selectedId) ?? users[0] ?? null
+
+    return (
+        <section className={cx(ui.panel, "animate-rise")}>
+            <p className={ui.eyebrow}>Query + React Hook Form</p>
+            <h2 className={ui.title}>Users & reports</h2>
+            <p className={ui.lede}>
+                List in <strong>React Query</strong>. Selected report edited
+                with <code>react-hook-form</code> (
+                <code>formState.isDirty</code>). Selection is page state — if
+                the id is gone, we pick the first user. Save → mutation →
+                invalidate + <code>reset</code>.
+            </p>
+
+            {isPending ? (
+                <p className="text-muted mt-6 text-sm">Loading…</p>
+            ) : (
+                /*
+                 * key = remount the form when the user changes.
+                 * Fresh defaultValues, no useEffect / reset sync needed.
+                 */
+                <ReportWorkspace
+                    key={selectedUser?.id ?? "none"}
+                    users={users}
+                    selectedUser={selectedUser}
+                    onSelectUser={setSelectedId}
+                />
+            )}
+        </section>
+    )
+}
+
+function ReportWorkspace({
+    users,
+    selectedUser,
+    onSelectUser
+}: {
+    users: User[]
+    selectedUser: User | null
+    onSelectUser: (id: string) => void
+}) {
+    const form = useForm<Report>({
+        defaultValues: selectedUser
+            ? structuredClone(selectedUser.report)
+            : undefined,
+        shouldUnregister: false
+    })
+    const { isDirty } = form.formState
+    const selectedId = selectedUser?.id ?? null
+
     function handleSelect(user: User) {
-        if (isReportModified) {
+        if (user.id === selectedId) return
+        if (isDirty) {
             const ok = window.confirm(
                 "Discard modified report changes for the current user?"
             )
             if (!ok) return
         }
-        const cached = queryClient
-            .getQueryData<User[]>(USERS_QUERY_KEY)
-            ?.find((item) => item.id === user.id)
-        selectUser(cached ?? user)
+        onSelectUser(user.id)
     }
 
     return (
-        <section className={cx(ui.panel, "animate-rise")}>
-            <p className={ui.eyebrow}>Query + useUsersStore</p>
-            <h2 className={ui.title}>Users & reports</h2>
-            <p className={ui.lede}>
-                API returns users (each with a <code>report</code>). List stays
-                in <strong>React Query</strong>. The selected user&apos;s report
-                is edited in <code>useUsersStore</code>. Save → mutation →
-                invalidate.
-            </p>
-
+        <FormProvider {...form}>
             <div className="mt-5 grid gap-3 sm:grid-cols-3">
                 <WideLearnerSubscriber />
                 <NarrowNameSubscriber />
-                <NarrowUsersSubscriber />
+                <NarrowReportFormSubscriber selectedId={selectedId} />
             </div>
 
             <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,14rem)_minmax(0,1fr)]">
@@ -59,19 +99,18 @@ export function ReportPage() {
                             useQuery users
                         </p>
                     </div>
-                    {isPending ? (
-                        <p className="text-muted p-4 text-sm">Loading…</p>
-                    ) : (
-                        <UserList
-                            users={users}
-                            selectedId={selectedId}
-                            onSelect={handleSelect}
-                        />
-                    )}
+                    <UserList
+                        users={users}
+                        selectedId={selectedId}
+                        onSelect={handleSelect}
+                    />
                 </div>
 
-                <UserReportEditor />
+                <UserReportEditor
+                    userId={selectedUser?.id ?? null}
+                    userName={selectedUser?.name ?? null}
+                />
             </div>
-        </section>
+        </FormProvider>
     )
 }

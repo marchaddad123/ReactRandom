@@ -7,11 +7,12 @@ export function CounterPage() {
     return (
         <section className={cx(ui.panel, "animate-rise")}>
             <p className={ui.eyebrow}>Page: Counter</p>
-            <h2 className={ui.title}>Kept-alive page</h2>
+            <h2 className={ui.title}>Local page state</h2>
             <p className={ui.counter}>Clicks: {clicks}</p>
             <p className={ui.lede}>
-                Bump this, switch routes, then come back — state should still be
-                here because of <code>&lt;Activity&gt;</code>.
+                Bump this, switch routes, then come back — count resets because
+                the page unmounted. See Compare for <code>Activity</code>{" "}
+                keep-alive.
             </p>
             <div className={ui.actions}>
                 <button

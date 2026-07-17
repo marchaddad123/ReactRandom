@@ -17,15 +17,18 @@
     "dependencies": {
         "@headlessui/react": "^2.2.10",
         "@heroicons/react": "^2.2.0",
+        "@hookform/resolvers": "^5.4.0",
         "@reduxjs/toolkit": "^2.12.0",
         "@tanstack/react-query": "^5.101.2",
         "hammerjs": "^2.0.8",
         "lodash-es": "^4.18.1",
         "react": "^19.2.7",
         "react-dom": "^19.2.7",
+        "react-hook-form": "^7.81.0",
         "react-redux": "^9.3.0",
         "react-router-dom": "^7.18.1",
         "react-transition-group": "^4.4.5",
+        "zod": "^4.4.3",
         "zustand": "^5.0.14"
     },
     "devDependencies": {

@@ -8,7 +8,7 @@ export function NotesPage() {
         console.log("NotesPage effect mounted")
 
         return () => {
-            console.log("NotesPage effect cleaned up (hidden or unmounted)")
+            console.log("NotesPage effect cleaned up (unmounted)")
         }
     }, [])
 
@@ -17,10 +17,9 @@ export function NotesPage() {
             <p className={ui.eyebrow}>Page: Notes</p>
             <h2 className={ui.title}>Local page state</h2>
             <p className={ui.lede}>
-                With <code>&lt;Activity&gt;</code>, this text should survive
-                when you leave and come back. Open the console: the effect
-                cleans up while hidden, then mounts again when visible (state
-                still kept).
+                Leaving this route unmounts the page — draft text is lost. Open
+                the console: the effect cleans up on leave and mounts again when
+                you return.
             </p>
             <label
                 className={cx(ui.fieldLabel, "mt-4")}

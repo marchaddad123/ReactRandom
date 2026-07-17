@@ -1,6 +1,7 @@
 import { useRef } from "react"
+import { useFormContext, useWatch } from "react-hook-form"
 import { useLearnerStore } from "../store/useLearnerStore"
-import { selectIsReportModified, useUsersStore } from "../store/useUsersStore"
+import type { Report } from "../types/report"
 
 /** Counts how many times this component function ran (re-rendered). */
 function useRenderCount(label: string) {
@@ -53,28 +54,37 @@ export function NarrowNameSubscriber() {
     )
 }
 
-/** Selected user report — bumps on every edit in useUsersStore. */
-export function NarrowUsersSubscriber() {
-    const stats = useRenderCount("NarrowUsers (selected report)")
-    const report = useUsersStore((state) => state.report)
-    const isReportModified = useUsersStore(selectIsReportModified)
+/**
+ * Small demo card: peeks into the SAME React Hook Form notebook.
+ * useWatch("meta.title") = only care about the title line.
+ * isDirty = did anyone change the notebook since reset?
+ */
+export function NarrowReportFormSubscriber({
+    selectedId
+}: {
+    selectedId: string | null
+}) {
+    const stats = useRenderCount("NarrowForm (RHF watch)")
+    const { formState } = useFormContext<Report>()
+    const { isDirty } = formState
+    const title = useWatch<Report, "meta.title">({ name: "meta.title" })
 
     return (
         <div className="border-primary/25 bg-primary/5 rounded-lg border p-4">
             <RenderBadge {...stats} />
             <p className="text-ink mt-2 mb-0 text-sm">
-                {report ? (
+                {selectedId ? (
                     <>
-                        title=<code>{report.meta.title}</code> · modified=
-                        <code>{String(isReportModified)}</code>
+                        title=<code>{title || "(empty)"}</code> · isDirty=
+                        <code>{String(isDirty)}</code>
                     </>
                 ) : (
                     "No user selected"
                 )}
             </p>
             <p className="text-muted mt-1 mb-0 text-xs">
-                Typing updates <code>useUsersStore</code> only — Query cache
-                waits until Save.
+                <code>useWatch</code> / <code>formState.isDirty</code> — Query
+                cache waits until Save.
             </p>
         </div>
     )

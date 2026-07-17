@@ -2,7 +2,7 @@ import { create } from "zustand"
 
 /**
  * Lean client UI state only — name/count for learning demos.
- * Selected user report lives in useUsersStore (server list in Query).
+ * Report selection lives on ReportPage; report fields in React Hook Form.
  */
 type LearnerState = {
     name: string

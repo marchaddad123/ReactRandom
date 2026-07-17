@@ -1,4 +1,5 @@
 import { createInitialReport } from "../types/report"
+import type { CreateUserInput } from "../types/createUser"
 import type { Report } from "../types/report"
 import type { User } from "../types/user"
 
@@ -60,4 +61,49 @@ export async function updateUserReport(
         i === index ? { ...user, report: structuredClone(report) } : user
     )
     return structuredClone(usersDb[index]!)
+}
+
+/** Next id like u4 from existing u1, u2, u3… */
+function nextUserId(): string {
+    let max = 0
+    for (const user of usersDb) {
+        const match = /^u(\d+)$/.exec(user.id)
+        if (match) {
+            max = Math.max(max, Number(match[1]))
+        }
+    }
+    return `u${max + 1}`
+}
+
+/**
+ * Create user from form fields only.
+ * API assigns id (uN+1) and builds the default report from name.
+ */
+export async function createUser(input: CreateUserInput): Promise<User> {
+    await delay()
+    // Unique email — same idea as a UNIQUE constraint in a DB
+    const emailKey = input.email.trim().toLowerCase()
+    if (usersDb.some((user) => user.email.toLowerCase() === emailKey)) {
+        throw new Error("Email already in use")
+    }
+    const user: User = {
+        id: nextUserId(),
+        name: input.name,
+        email: input.email.trim(),
+        role: input.role,
+        report: createInitialReport(input.name)
+    }
+    usersDb = [...usersDb, user]
+    return structuredClone(user)
+}
+
+/** Remove a user by id — like DELETE /users/:id */
+export async function deleteUser(userId: string): Promise<string> {
+    await delay(500)
+    const exists = usersDb.some((user) => user.id === userId)
+    if (!exists) {
+        throw new Error("User not found")
+    }
+    usersDb = usersDb.filter((user) => user.id !== userId)
+    return userId
 }

@@ -1,5 +1,4 @@
-import { Activity } from "react"
-import { NavLink, useLocation } from "react-router-dom"
+import { NavLink, Route, Routes } from "react-router-dom"
 import { Notifications } from "./components/Notifications"
 import { cx, ui } from "./lib/ui"
 import { ComparePage } from "./pages/ComparePage"
@@ -10,6 +9,7 @@ import { NotesPage } from "./pages/NotesPage"
 import { OverlaysPage } from "./pages/OverlaysPage"
 import { ReportPage } from "./pages/ReportPage"
 import { TodosPage } from "./pages/TodosPage"
+import { UsersPage } from "./pages/Users"
 
 const routes = [
     { path: "/", label: "Home", element: <HomePage /> },
@@ -18,13 +18,12 @@ const routes = [
     { path: "/compare", label: "Compare", element: <ComparePage /> },
     { path: "/fetch", label: "Fetch", element: <FetchPage /> },
     { path: "/todos", label: "Todos", element: <TodosPage /> },
-    { path: "/report", label: "Users", element: <ReportPage /> },
+    { path: "/users", label: "Users", element: <UsersPage /> },
+    { path: "/report", label: "Reports", element: <ReportPage /> },
     { path: "/overlays", label: "Overlays", element: <OverlaysPage /> }
 ] as const
 
 function App() {
-    const { pathname } = useLocation()
-
     return (
         <>
             <Notifications />
@@ -65,16 +64,15 @@ function App() {
                 </nav>
 
                 <main>
-                    {routes.map((route) => (
-                        <Activity
-                            key={route.path}
-                            mode={
-                                pathname === route.path ? "visible" : "hidden"
-                            }
-                        >
-                            {route.element}
-                        </Activity>
-                    ))}
+                    <Routes>
+                        {routes.map((route) => (
+                            <Route
+                                key={route.path}
+                                path={route.path}
+                                element={route.element}
+                            />
+                        ))}
+                    </Routes>
                 </main>
             </div>
         </>
