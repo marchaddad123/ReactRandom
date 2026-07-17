@@ -86,7 +86,7 @@ export function TodosPage() {
         <section className={cx(ui.panel, "animate-rise overflow-hidden !p-0")}>
             <div className="border-line border-b px-6 py-5">
                 <p className={ui.eyebrow}>localStorage</p>
-                <h2 className="font-display text-ink m-0 text-2xl tracking-tight">
+                <h2 className="font-display text-ink m-0 text-2xl leading-snug tracking-tight">
                     Todo list
                 </h2>
                 <p className={ui.lede}>

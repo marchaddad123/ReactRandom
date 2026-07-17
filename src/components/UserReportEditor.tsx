@@ -122,7 +122,7 @@ export function UserReportEditor() {
             <div className="flex flex-wrap items-end justify-between gap-3">
                 <div>
                     <p className={ui.eyebrow}>useUsersStore</p>
-                    <h3 className="font-display text-ink m-0 text-lg">
+                    <h3 className="font-display text-ink m-0 text-lg leading-snug">
                         {userName}
                     </h3>
                     {/* Always render — invisible when clean — avoids CLS */}

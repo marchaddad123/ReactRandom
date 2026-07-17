@@ -10,8 +10,8 @@ export const ui = {
     panelInset: "rounded-xl border border-dashed border-line bg-tertiary/45",
     eyebrow:
         "mb-1.5 text-[0.72rem] font-bold tracking-[0.14em] text-secondary uppercase",
-    title: "font-display m-0 text-xl font-bold tracking-tight text-ink",
-    brand: "font-display m-0 mb-2 text-[clamp(2rem,4vw,2.75rem)] leading-[1.05] font-bold tracking-tight text-primary",
+    title: "font-display m-0 overflow-visible text-xl leading-snug font-bold tracking-tight text-ink",
+    brand: "font-display m-0 mb-2 overflow-visible text-[clamp(2rem,4vw,2.75rem)] leading-snug font-bold tracking-tight text-primary",
     lede: "mt-2 max-w-xl text-[0.95rem] leading-relaxed text-muted",
     hint: "mt-2 text-[0.95rem] leading-relaxed text-muted",
     fieldLabel: "mb-3 block text-sm font-semibold text-ink",
@@ -19,7 +19,7 @@ export const ui = {
     textarea: "min-h-32 resize-y",
     actions: "mt-4 flex flex-wrap gap-2.5",
     counter:
-        "font-display m-0 mb-1 text-[1.65rem] font-bold tracking-tight text-primary",
+        "font-display m-0 mb-1 text-[1.65rem] leading-snug font-bold tracking-tight text-primary",
     btn: "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-[0.55rem] border border-transparent px-4 py-2.5 text-[0.9rem] leading-tight font-semibold transition-[background,color,border-color,transform] active:enabled:translate-y-px disabled:cursor-not-allowed disabled:opacity-50",
     btnPrimary: "bg-primary text-primary-fg hover:enabled:bg-primary/90",
     btnSecondary:

@@ -2,7 +2,7 @@
 
 @theme {
     --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
-    --font-display: "Syne", ui-sans-serif, system-ui, sans-serif;
+    --font-display: "Outfit", ui-sans-serif, system-ui, sans-serif;
 
     --color-primary: #0f4c5c;
     --color-primary-fg: #f4f7f6;
@@ -20,8 +20,9 @@
     --color-danger: #b42318;
     --color-success: #067647;
 
-    --animate-rise: rise 0.45s ease-out both;
-    --animate-nav: nav-in 0.4s ease-out both;
+    /* forwards + transform:none at end — avoids leftover transform clipping descenders */
+    --animate-rise: rise 0.45s ease-out forwards;
+    --animate-nav: nav-in 0.4s ease-out forwards;
 
     /* Nuxt Modal slide easing */
     --ease-modal-cubic: cubic-bezier(0.32, 0.72, 0, 1);
@@ -34,7 +35,7 @@
     }
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: none;
     }
 }
 
@@ -45,7 +46,7 @@
     }
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: none;
     }
 }
 

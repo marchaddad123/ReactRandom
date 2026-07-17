@@ -39,7 +39,7 @@ export function WelcomeCard({ currentStack }: WelcomeCardProps) {
     return (
         <section className={cx(ui.panel, "animate-rise")}>
             <p className={ui.eyebrow}>React + TypeScript + Tailwind</p>
-            <h1 className="font-display text-ink m-0 text-2xl tracking-tight">
+            <h1 className="font-display text-ink m-0 text-2xl leading-snug tracking-tight">
                 Welcome, {name || "Vue developer"}
             </h1>
             <p className={ui.lede}>
