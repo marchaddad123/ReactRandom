@@ -1,10 +1,4 @@
-import {
-    Dialog,
-    DialogPanel,
-    DialogTitle,
-    Transition,
-    TransitionChild
-} from "@headlessui/react"
+import { Transition, TransitionChild } from "@headlessui/react"
 import {
     ArrowRightStartOnRectangleIcon,
     CheckIcon,
@@ -12,6 +6,7 @@ import {
     XMarkIcon
 } from "@heroicons/react/24/outline"
 import { Fragment, type ReactNode, useEffect, useRef, useState } from "react"
+import { createPortal } from "react-dom"
 import { cx } from "../../lib/ui"
 
 export type DialogPanelSize = "default" | "2xl" | "3xl" | "wide"
@@ -26,7 +21,6 @@ export type DialogUIProps = {
     customClass?: string
     panelSize?: DialogPanelSize
     notCloseable?: boolean
-    /** Parent sets true to play leave animation, then we emit onClosing */
     animateBeforeClosing?: boolean
     onAnimateBeforeClosingChange?: (value: boolean) => void
     onClosing: () => void
@@ -48,8 +42,11 @@ function bgAccent(danger: boolean | undefined) {
 }
 
 /**
- * Port of Nuxt DialogUI.vue (Headless UI Dialog + transitions).
- * Parent typically: `{open && <DialogUI onClosing={() => setOpen(false)} />}`
+ * Port of Nuxt DialogUI.vue — same TransitionRoot / TransitionChild structure.
+ *
+ * Nuxt uses `<DialogPanel as="template">` so scale/opacity run on the inner
+ * `.content` div (not a Headless wrapper). We mirror that + portal to body
+ * (same as Modal) so fixed overlays aren't clipped by parent transforms.
  */
 export function DialogUI({
     title = "",
@@ -68,12 +65,14 @@ export function DialogUI({
     onMounted
 }: DialogUIProps) {
     const [showContent, setShowContent] = useState(true)
+    const rootRef = useRef<HTMLDivElement>(null)
     const initialFocusTarget = useRef<HTMLButtonElement>(null)
     const isClosing = useRef(false)
     const closingTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     useEffect(() => {
         onMounted?.()
+        initialFocusTarget.current?.focus()
         return () => {
             if (closingTimer.current) clearTimeout(closingTimer.current)
         }
@@ -87,42 +86,58 @@ export function DialogUI({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [animateBeforeClosing])
 
+    useEffect(() => {
+        const root = rootRef.current
+        if (!root) return
+
+        function handleEscKey(event: KeyboardEvent) {
+            if (event.key === "Escape") beginClose()
+        }
+
+        root.addEventListener("keydown", handleEscKey)
+        return () => root.removeEventListener("keydown", handleEscKey)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
     function beginClose() {
         if (notCloseable || isClosing.current) return
         isClosing.current = true
+        // Nuxt: show_content = false, then emit("closing") after leave (200ms)
         setShowContent(false)
         closingTimer.current = setTimeout(() => {
             onClosing()
-        }, 300)
+        }, 200)
     }
 
-    function handleDialogClose() {
+    function closeFromBackdrop() {
         onClickOutside?.()
         beginClose()
     }
 
     const showAccent = danger !== undefined || checkmark
 
-    return (
+    return createPortal(
         <Transition
             appear
             show={showContent}
             as={Fragment}
         >
-            <Dialog
-                as="div"
-                className="removeOverflow relative z-40"
+            <div
+                ref={rootRef}
+                className="removeOverflow relative z-40 outline-none"
                 data-dialog-ui=""
-                open={showContent}
-                initialFocus={initialFocusTarget}
-                onClose={handleDialogClose}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="dialog-ui-title"
+                tabIndex={-1}
             >
+                {/* Backdrop — Nuxt TransitionChild opacity only */}
                 <TransitionChild
                     as={Fragment}
-                    enter="duration-500 ease-out"
+                    enter="duration-300 ease-out"
                     enterFrom="opacity-0"
                     enterTo="opacity-100"
-                    leave="duration-300 ease-in"
+                    leave="duration-200 ease-in"
                     leaveFrom="opacity-100"
                     leaveTo="opacity-0"
                 >
@@ -130,12 +145,12 @@ export function DialogUI({
                         className="fixed inset-0 bg-black/50"
                         onMouseDown={(event) => {
                             if (event.target === event.currentTarget) {
-                                beginClose()
+                                closeFromBackdrop()
                             }
                         }}
                         onTouchStart={(event) => {
                             if (event.target === event.currentTarget) {
-                                beginClose()
+                                closeFromBackdrop()
                             }
                         }}
                     />
@@ -143,16 +158,20 @@ export function DialogUI({
 
                 <div className="fixed inset-0 overflow-hidden p-4 sm:p-8">
                     <div className="flex h-full w-full items-center justify-center">
+                        {/*
+                          Nuxt: TransitionChild wraps DialogPanel as="template",
+                          so these classes apply to the inner .content div.
+                        */}
                         <TransitionChild
                             as={Fragment}
-                            enter="duration-500 ease-out"
+                            enter="duration-300 ease-out"
                             enterFrom="opacity-0 scale-95"
                             enterTo="opacity-100 scale-100"
-                            leave="duration-300 ease-in"
+                            leave="duration-200 ease-in"
                             leaveFrom="opacity-100 scale-100"
                             leaveTo="opacity-0 scale-95"
                         >
-                            <DialogPanel
+                            <div
                                 className={cx(
                                     "content relative flex w-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white",
                                     panelSizeClass[panelSize],
@@ -166,53 +185,55 @@ export function DialogUI({
                                     tabIndex={-1}
                                     aria-hidden="true"
                                 />
-                                <DialogTitle as="div">
-                                    <div className="flex shrink-0 cursor-move items-center space-x-4 border-b border-gray-100 px-6 pt-6 pb-4">
-                                        {showAccent ? (
-                                            <div
-                                                className={cx(
-                                                    "flex h-12 w-12 shrink-0 items-center justify-center rounded-full sm:h-10 sm:w-10",
-                                                    bgAccent(danger)
-                                                )}
-                                            >
-                                                {icon === "logout" ? (
-                                                    <ArrowRightStartOnRectangleIcon className="size-6 text-red-600" />
-                                                ) : danger ? (
-                                                    <ExclamationTriangleIcon
-                                                        className="h-6 w-6 text-red-600"
-                                                        aria-hidden="true"
-                                                    />
-                                                ) : checkmark ? (
-                                                    <CheckIcon
-                                                        className="h-6 w-6 text-green-600"
-                                                        aria-hidden="true"
-                                                    />
-                                                ) : null}
-                                            </div>
-                                        ) : null}
-                                        <div className="flex flex-1 items-center justify-between space-x-2">
-                                            {titleSlot ?? (
-                                                <span className="line-clamp-1 flex-1 text-left font-medium">
-                                                    {title}
-                                                </span>
+                                <div
+                                    id="dialog-ui-title"
+                                    className="flex shrink-0 cursor-move items-center space-x-4 border-b border-gray-100 px-6 pt-6 pb-4"
+                                >
+                                    {showAccent ? (
+                                        <div
+                                            className={cx(
+                                                "flex h-12 w-12 shrink-0 items-center justify-center rounded-full sm:h-10 sm:w-10",
+                                                bgAccent(danger)
                                             )}
-                                            {!notCloseable ? (
-                                                <XMarkIcon
-                                                    className="size-5 cursor-pointer text-gray-600 transition-all duration-300 hover:rotate-180 hover:text-black"
-                                                    onClick={beginClose}
+                                        >
+                                            {icon === "logout" ? (
+                                                <ArrowRightStartOnRectangleIcon className="size-6 text-red-600" />
+                                            ) : danger ? (
+                                                <ExclamationTriangleIcon
+                                                    className="h-6 w-6 text-red-600"
+                                                    aria-hidden="true"
+                                                />
+                                            ) : checkmark ? (
+                                                <CheckIcon
+                                                    className="h-6 w-6 text-green-600"
+                                                    aria-hidden="true"
                                                 />
                                             ) : null}
                                         </div>
+                                    ) : null}
+                                    <div className="flex flex-1 items-center justify-between space-x-2">
+                                        {titleSlot ?? (
+                                            <span className="line-clamp-1 flex-1 text-left font-medium">
+                                                {title}
+                                            </span>
+                                        )}
+                                        {!notCloseable ? (
+                                            <XMarkIcon
+                                                className="size-5 cursor-pointer text-gray-600 transition-all duration-300 hover:rotate-180 hover:text-black"
+                                                onClick={beginClose}
+                                            />
+                                        ) : null}
                                     </div>
-                                </DialogTitle>
+                                </div>
                                 <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pt-4 pb-6 sm:text-left">
                                     {children}
                                 </div>
-                            </DialogPanel>
+                            </div>
                         </TransitionChild>
                     </div>
                 </div>
-            </Dialog>
-        </Transition>
+            </div>
+        </Transition>,
+        document.body
     )
 }
