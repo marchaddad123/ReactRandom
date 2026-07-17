@@ -3,31 +3,61 @@ import { type FormEvent, useState } from "react"
 import { addTodo, clearTodos, deleteTodo, listTodos } from "../lib/todoStorage"
 import { useNotifications } from "../store/NotificationContext"
 
+// This name is like a label on a box in the cache.
+// React Query uses it to find "our todo list" later.
 const TODOS_QUERY_KEY = ["local-todos"] as const
 
+// Turn any error into a simple message we can show in a toast.
+function errorMessage(error: unknown) {
+    return error instanceof Error ? error.message : "Something went wrong"
+}
+
 export function TodosPage() {
+    // Talks to React Query's big shared cache for the whole app.
     const queryClient = useQueryClient()
+
+    // Shows the little popup messages (green = good, red = bad).
     const { updateNotification } = useNotifications()
+
+    // What the user typed in the input box.
     const [title, setTitle] = useState("")
 
+    // useQuery = READ (like GET)
+    // Load the list and keep it in the cache under TODOS_QUERY_KEY.
     const { data: todos = [] } = useQuery({
         queryKey: TODOS_QUERY_KEY,
         queryFn: () => listTodos()
     })
 
+    // Tell React Query: "this list is old — go get a fresh one."
+    // We call this AFTER we add / delete / clear, so the screen updates.
     const invalidateTodos = () =>
         queryClient.invalidateQueries({ queryKey: TODOS_QUERY_KEY })
 
+    // useMutation = WRITE (like POST / PUT / DELETE)
+    // Runs only when we say so (button click), not on page load.
     const addMutation = useMutation({
+        // The actual work: save a new todo.
         mutationFn: (nextTitle: string) => Promise.resolve(addTodo(nextTitle)),
+
+        // Happy path — it worked!
         onSuccess: (todo) => {
-            void invalidateTodos()
-            setTitle("")
+            void invalidateTodos() // refresh the list on screen
+            setTitle("") // clear the input
             updateNotification({
                 message: `Added “${todo.title}”`,
-                error: false
+                error: false // green toast
+            })
+        },
+
+        // Sad path — something broke (empty title, or type FAIL).
+        onError: (error) => {
+            updateNotification({
+                message: errorMessage(error),
+                error: true // red toast
             })
         }
+        // onSettled would run after BOTH success and error (we skip it here).
     })
 
     const deleteMutation = useMutation({
@@ -38,6 +68,12 @@ export function TodosPage() {
         onSuccess: () => {
             void invalidateTodos()
             updateNotification({ message: "Todo deleted", error: false })
+        },
+        onError: (error) => {
+            updateNotification({
+                message: errorMessage(error),
+                error: true
+            })
         }
     })
 
@@ -49,19 +85,19 @@ export function TodosPage() {
         onSuccess: () => {
             void invalidateTodos()
             updateNotification({ message: "All todos cleared", error: false })
+        },
+        onError: (error) => {
+            updateNotification({
+                message: errorMessage(error),
+                error: true
+            })
         }
     })
 
+    // Form submit → ask the add mutation to run.
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
-        event.preventDefault()
-        if (!title.trim()) {
-            updateNotification({
-                message: "Title can’t be empty",
-                error: true
-            })
-            return
-        }
-        addMutation.mutate(title)
+        event.preventDefault() // don't reload the whole page
+        addMutation.mutate(title) // "go do the add now"
     }
 
     return (
@@ -74,7 +110,8 @@ export function TodosPage() {
                     Todo list
                 </h2>
                 <p className="mt-1 mb-0 text-sm text-slate-500">
-                    Add and delete · saved in localStorage
+                    Add and delete · type <code>FAIL</code> to demo{" "}
+                    <code>onError</code>
                 </p>
             </div>
 
