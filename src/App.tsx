@@ -51,7 +51,12 @@ function App() {
                             to={route.path}
                             end={route.path === "/"}
                             className={({ isActive }) =>
-                                cx(ui.navLink, isActive && ui.navLinkActive)
+                                cx(
+                                    ui.navLink,
+                                    isActive
+                                        ? ui.navLinkActive
+                                        : ui.navLinkInactive
+                                )
                             }
                         >
                             {route.label}
