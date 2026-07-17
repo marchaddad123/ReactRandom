@@ -7,7 +7,7 @@ import { CounterPage } from "./pages/CounterPage"
 import { FetchPage } from "./pages/FetchPage"
 import { HomePage } from "./pages/HomePage"
 import { NotesPage } from "./pages/NotesPage"
-import { ReduxPage } from "./pages/ReduxPage"
+import { ReportPage } from "./pages/ReportPage"
 import { TodosPage } from "./pages/TodosPage"
 
 const routes = [
@@ -17,7 +17,7 @@ const routes = [
     { path: "/compare", label: "Compare", element: <ComparePage /> },
     { path: "/fetch", label: "Fetch", element: <FetchPage /> },
     { path: "/todos", label: "Todos", element: <TodosPage /> },
-    { path: "/redux", label: "Redux", element: <ReduxPage /> }
+    { path: "/report", label: "Report", element: <ReportPage /> }
 ] as const
 
 function App() {
@@ -29,9 +29,9 @@ function App() {
             <main className="app">
                 <h1>Learn React</h1>
                 <p className="hint">
-                    Pages stay mounted via <code>&lt;Activity&gt;</code> —
-                    similar to Vue <code>&lt;KeepAlive&gt;</code>. Switch tabs,
-                    keep local state.
+                    App state = <code>Zustand</code>. Context + Redux code is
+                    kept under <code>src/store/*Context</code> and{" "}
+                    <code>src/redux</code> as reference only.
                 </p>
 
                 <nav className="mb-4 flex flex-wrap gap-2">

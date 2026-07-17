@@ -105,8 +105,8 @@ export function HomePage() {
                     and{" "}
                     <code className="rounded bg-slate-100 px-1.5 py-0.5">
                         useThemeStore
-                    </code>
-                    . No wrapping in <code>main.tsx</code>.
+                    </code>{" "}
+                    (Zustand). Context / Redux folders are reference only.
                 </p>
                 <div className="flex flex-wrap items-center gap-3">
                     <p

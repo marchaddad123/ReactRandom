@@ -13,6 +13,9 @@ import {
 } from "../redux/selectors"
 
 /**
+ * LEGACY / REFERENCE ONLY — not linked in the app nav.
+ * Live state = Zustand. This page is the full Redux learning example.
+ *
  * FULL Redux Toolkit picture (Vuex → RTK):
  *
  * | Vuex        | Redux Toolkit                         |

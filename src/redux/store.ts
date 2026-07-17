@@ -3,13 +3,18 @@ import cartReducer from "./cartSlice"
 import productsReducer from "./productsSlice"
 
 /**
- * STEP 1 — ONE store for the whole app.
+ * LEGACY / REFERENCE ONLY — not wired in main.tsx anymore.
+ * Live app state uses Zustand (`src/store/use*Store.ts`).
+ * Keep this folder to re-read Redux / Vuex mapping later.
  *
+ * To try the demo again:
+ * 1) Wrap app in <Provider store={reduxStore}>
+ * 2) Add ReduxPage back to App routes
+ *
+ * STEP 1 — ONE store for the whole app.
  * configureStore({ reducer: { ... } })
  *   keys  = names on the big state object (state.cart, state.products)
  *   values = slice reducers (the update rules for that piece)
- *
- * Like Vuex: one store, many modules.
  */
 export const reduxStore = configureStore({
     reducer: {
