@@ -7,6 +7,7 @@ import { CounterPage } from "./pages/CounterPage"
 import { FetchPage } from "./pages/FetchPage"
 import { HomePage } from "./pages/HomePage"
 import { NotesPage } from "./pages/NotesPage"
+import { ReduxPage } from "./pages/ReduxPage"
 import { TodosPage } from "./pages/TodosPage"
 
 const routes = [
@@ -15,7 +16,8 @@ const routes = [
     { path: "/counter", label: "Counter", element: <CounterPage /> },
     { path: "/compare", label: "Compare", element: <ComparePage /> },
     { path: "/fetch", label: "Fetch", element: <FetchPage /> },
-    { path: "/todos", label: "Todos", element: <TodosPage /> }
+    { path: "/todos", label: "Todos", element: <TodosPage /> },
+    { path: "/redux", label: "Redux", element: <ReduxPage /> }
 ] as const
 
 function App() {
