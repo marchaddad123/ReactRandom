@@ -2,7 +2,12 @@ import { z } from "zod"
 
 /** What the create-user form sends — no id / report (API adds those). */
 const createUserFieldsSchema = z.object({
-    name: z.string().trim().min(1, "Name is required"),
+    name: z
+        .string()
+        .trim()
+        .min(1, "Name is required")
+        // Letters, spaces, hyphen, apostrophe — no symbols/digits
+        .regex(/^[\p{L}\s'-]+$/u, "Name cannot contain symbols"),
     email: z
         .string()
         .trim()
