@@ -6,6 +6,7 @@ import {
 } from "@heroicons/react/24/outline"
 import { useRef, type ComponentProps } from "react"
 import { CSSTransition, TransitionGroup } from "react-transition-group"
+import { cx } from "../lib/ui"
 import {
     type Notification,
     useNotificationStore
@@ -28,8 +29,6 @@ function NotificationTransition({
     const nodeRef = useRef<HTMLDivElement>(null)
 
     return (
-        // TransitionGroup injects `in` / callbacks — must forward them here
-        // or leave animations never run and toasts stack forever.
         <CSSTransition
             nodeRef={nodeRef}
             timeout={300}
@@ -39,23 +38,23 @@ function NotificationTransition({
         >
             <div
                 ref={nodeRef}
-                className="notification-card pointer-events-auto flex w-max max-w-[min(24rem,calc(100vw-2rem))] shrink-0 items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm"
+                className="border-line bg-surface pointer-events-auto flex w-max max-w-[min(24rem,calc(100vw-2rem))] shrink-0 items-center gap-2 rounded-md border px-3 py-2 text-sm shadow-sm"
             >
                 {notification.error === true ? (
-                    <ExclamationTriangleIcon className="h-4 w-4 shrink-0 text-red-600" />
+                    <ExclamationTriangleIcon className="text-danger h-4 w-4 shrink-0" />
                 ) : notification.error === false ? (
-                    <CheckIcon className="h-4 w-4 shrink-0 text-green-600" />
+                    <CheckIcon className="text-success h-4 w-4 shrink-0" />
                 ) : (
-                    <InformationCircleIcon className="h-4 w-4 shrink-0 text-blue-600" />
+                    <InformationCircleIcon className="text-primary h-4 w-4 shrink-0" />
                 )}
 
-                <p className="min-w-0 flex-1 leading-5 text-gray-700">
+                <p className="text-ink min-w-0 flex-1 leading-5">
                     {notification.message}
                 </p>
 
                 <button
                     type="button"
-                    className="notification-dismiss flex shrink-0 items-center self-center text-gray-500 transition-colors hover:text-gray-900"
+                    className="text-muted hover:text-ink flex shrink-0 cursor-pointer items-center self-center border-0 bg-transparent p-0 transition-colors"
                     aria-label="Dismiss notification"
                     onClick={() => onDismiss(notification.id)}
                 >
@@ -71,12 +70,10 @@ export function Notifications({ alignToContent = false }: NotificationsProps) {
 
     return (
         <TransitionGroup
-            className={[
-                "notifications-stack",
-                alignToContent ? "notifications-stack--align-content" : ""
-            ]
-                .filter(Boolean)
-                .join(" ")}
+            className={cx(
+                "pointer-events-none fixed top-[4.5rem] right-4 z-[1000] flex w-auto max-w-96 flex-col items-end gap-2 sm:right-8 sm:max-w-md",
+                alignToContent && "absolute top-0 right-0"
+            )}
         >
             {notifications.map((notification) => (
                 <NotificationTransition

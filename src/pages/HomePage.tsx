@@ -1,12 +1,15 @@
 import { type ChangeEvent, useEffect, useRef, useState } from "react"
 import { WelcomeCard } from "../components/WelcomeCard"
+import { cx, ui } from "../lib/ui"
 import { useLearnerStore } from "../store/useLearnerStore"
 import { useThemeStore } from "../store/useThemeStore"
 
 export function HomePage() {
-    // Zustand: pick what you need (like storeToRefs / Pinia).
-    const { name, setName, count, incrementCount, resetCount } =
-        useLearnerStore()
+    const name = useLearnerStore((state) => state.name)
+    const setName = useLearnerStore((state) => state.setName)
+    const count = useLearnerStore((state) => state.count)
+    const incrementCount = useLearnerStore((state) => state.incrementCount)
+    const resetCount = useLearnerStore((state) => state.resetCount)
     const { theme, toggleTheme } = useThemeStore()
 
     const doubledCount = count * 2
@@ -33,56 +36,62 @@ export function HomePage() {
         setName(event.target.value)
     }
 
-    const themeBadgeClass =
-        theme === "sky"
-            ? "bg-sky-50 text-sky-800"
-            : "bg-emerald-50 text-emerald-800"
-
     return (
         <>
             <WelcomeCard currentStack="Vue and Nuxt" />
 
-            <section className="card">
-                <h2>1. State and input (parent)</h2>
-                <label htmlFor="name">Your name</label>
-                <input
-                    id="name"
-                    value={name}
-                    onChange={handleNameChange}
-                    placeholder="Enter your name"
-                />
-                <p className="hint">
+            <section
+                className={cx(ui.panel, "animate-rise")}
+                style={{ animationDelay: "50ms" }}
+            >
+                <p className={ui.eyebrow}>Parent state</p>
+                <h2 className={ui.title}>1. State and input</h2>
+                <label
+                    className={ui.fieldLabel}
+                    htmlFor="name"
+                >
+                    Your name
+                    <input
+                        id="name"
+                        className={ui.field}
+                        value={name}
+                        onChange={handleNameChange}
+                        placeholder="Enter your name"
+                    />
+                </label>
+                <p className={ui.hint}>
                     <code>name</code> lives in <code>useLearnerStore</code>{" "}
-                    (Zustand — like Pinia). Old Context files are still in{" "}
-                    <code>src/store/*Context.tsx</code> for comparison.
+                    (Zustand — like Pinia).
                 </p>
-                <p>
-                    <span className="font-medium text-sky-600">{name}</span> is
-                    Learning React!
+                <p className="text-ink mt-3 mb-0">
+                    <span className="text-primary font-semibold">{name}</span>{" "}
+                    is learning React.
                 </p>
             </section>
 
-            <section className="card">
-                <h2>2. Counter</h2>
-                <p className="counter">Count: {count}</p>
-                <p>Derived value: {doubledCount}</p>
-                <p className="hint">
-                    useEffect watch demo: oldVal={" "}
-                    <code>{countWatch.oldVal}</code>, newVal={" "}
-                    <code>{countWatch.newVal}</code> (also logged in the
-                    console)
+            <section
+                className={cx(ui.panel, "animate-rise")}
+                style={{ animationDelay: "100ms" }}
+            >
+                <p className={ui.eyebrow}>Derived + effect</p>
+                <h2 className={ui.title}>2. Counter</h2>
+                <p className={ui.counter}>Count: {count}</p>
+                <p className="text-ink m-0">Derived value: {doubledCount}</p>
+                <p className={ui.hint}>
+                    useEffect watch: oldVal=<code>{countWatch.oldVal}</code>,
+                    newVal=<code>{countWatch.newVal}</code>
                 </p>
-
-                <div className="actions">
+                <div className={ui.actions}>
                     <button
                         type="button"
+                        className={cx(ui.btn, ui.btnPrimary)}
                         onClick={incrementCount}
                     >
                         Add one
                     </button>
                     <button
                         type="button"
-                        className="secondary"
+                        className={cx(ui.btn, ui.btnTertiary)}
                         onClick={resetCount}
                     >
                         Reset
@@ -90,32 +99,23 @@ export function HomePage() {
                 </div>
             </section>
 
-            <section className="rounded-xl border border-slate-200 bg-white p-6">
-                <p className="mb-2 text-sm font-semibold tracking-wide text-sky-600 uppercase">
-                    Zustand stores
+            <section
+                className={cx(ui.panel, "animate-rise")}
+                style={{ animationDelay: "150ms" }}
+            >
+                <p className={ui.eyebrow}>Zustand stores</p>
+                <h2 className={ui.title}>3. Multiple stores</h2>
+                <p className={ui.lede}>
+                    App uses <code>useLearnerStore</code> and{" "}
+                    <code>useThemeStore</code>. No Provider wrapper.
                 </p>
-                <h2 className="mb-2 text-lg font-semibold text-slate-900">
-                    3. Multiple stores (no Provider)
-                </h2>
-                <p className="mb-4 text-slate-600">
-                    App uses{" "}
-                    <code className="rounded bg-slate-100 px-1.5 py-0.5">
-                        useLearnerStore
-                    </code>{" "}
-                    and{" "}
-                    <code className="rounded bg-slate-100 px-1.5 py-0.5">
-                        useThemeStore
-                    </code>{" "}
-                    (Zustand). Context / Redux folders are reference only.
-                </p>
-                <div className="flex flex-wrap items-center gap-3">
-                    <p
-                        className={`inline-flex rounded-lg px-3 py-2 text-sm font-medium ${themeBadgeClass}`}
-                    >
+                <div className="mt-4 flex flex-wrap items-center gap-3">
+                    <span className="bg-tertiary text-tertiary-fg inline-flex rounded-md px-3 py-2 text-sm font-medium">
                         Theme: {theme}
-                    </p>
+                    </span>
                     <button
                         type="button"
+                        className={cx(ui.btn, ui.btnSecondary)}
                         onClick={toggleTheme}
                     >
                         Toggle theme store

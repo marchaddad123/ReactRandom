@@ -1,5 +1,9 @@
 import { create } from "zustand"
 
+/**
+ * Lean client UI state only — name/count for learning demos.
+ * Selected user report lives in useUsersStore (server list in Query).
+ */
 type LearnerState = {
     name: string
     setName: (name: string) => void
@@ -8,7 +12,6 @@ type LearnerState = {
     resetCount: () => void
 }
 
-// Same shape as LearnerContext, but Zustand (like Pinia).
 export const useLearnerStore = create<LearnerState>((set) => ({
     name: "Mark",
     setName: (name) => set({ name }),

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { cx, ui } from "../lib/ui"
 
 export function NotesPage() {
     const [note, setNote] = useState("Type a draft note…")
@@ -12,22 +13,27 @@ export function NotesPage() {
     }, [])
 
     return (
-        <section className="card">
-            <p className="eyebrow">Page: Notes</p>
-            <h2>Local page state</h2>
-            <p className="hint">
+        <section className={cx(ui.panel, "animate-rise")}>
+            <p className={ui.eyebrow}>Page: Notes</p>
+            <h2 className={ui.title}>Local page state</h2>
+            <p className={ui.lede}>
                 With <code>&lt;Activity&gt;</code>, this text should survive
                 when you leave and come back. Open the console: the effect
                 cleans up while hidden, then mounts again when visible (state
                 still kept).
             </p>
-            <label htmlFor="note">Draft</label>
-            <textarea
-                id="note"
-                className="min-h-32 w-full rounded-lg border border-slate-300 p-3"
-                value={note}
-                onChange={(event) => setNote(event.target.value)}
-            />
+            <label
+                className={cx(ui.fieldLabel, "mt-4")}
+                htmlFor="note"
+            >
+                Draft
+                <textarea
+                    id="note"
+                    className={cx(ui.field, ui.textarea)}
+                    value={note}
+                    onChange={(event) => setNote(event.target.value)}
+                />
+            </label>
         </section>
     )
 }

@@ -1,8 +1,7 @@
 import { useTodo } from "../hooks/useTodo"
+import { cx, ui } from "../lib/ui"
 
 export function FetchPage() {
-    // Page stays thin: all fetch + query + extras live in useTodo.
-    // Flow: useTodo → useQuery → getTodo → sendRequest
     const {
         data,
         error,
@@ -16,19 +15,18 @@ export function FetchPage() {
     } = useTodo(1)
 
     return (
-        <section className="card">
-            <p className="eyebrow">Custom hook + sendRequest</p>
-            <h2>Server state (like useFetch)</h2>
-            <p className="hint">
-                No OpenAPI required. Flow: <code>useTodo(1)</code> →{" "}
-                <code>useQuery</code> → <code>getTodo</code> →{" "}
-                <code>sendRequest</code>. The hook can also return extras like{" "}
-                <code>titleUpper</code> / <code>isDone</code>.
+        <section className={cx(ui.panel, "animate-rise")}>
+            <p className={ui.eyebrow}>Custom hook + sendRequest</p>
+            <h2 className={ui.title}>Server state</h2>
+            <p className={ui.lede}>
+                Flow: <code>useTodo(1)</code> → <code>useQuery</code> →{" "}
+                <code>getTodo</code> → <code>sendRequest</code>.
             </p>
 
-            <div className="actions">
+            <div className={ui.actions}>
                 <button
                     type="button"
+                    className={cx(ui.btn, ui.btnPrimary)}
                     onClick={() => {
                         void refetch()
                     }}
@@ -38,31 +36,32 @@ export function FetchPage() {
                 </button>
             </div>
 
-            {isPending ? <p className="hint">Loading…</p> : null}
+            {isPending ? <p className={ui.hint}>Loading…</p> : null}
 
             {error ? (
-                <p className="hint">
+                <p className={ui.hint}>
                     Error:{" "}
                     {error instanceof Error ? error.message : "Unknown error"}
                 </p>
             ) : null}
 
             {data ? (
-                <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
-                    <p className="hint">{label}</p>
-                    <p>
-                        <span className="font-semibold">#{data.id}</span>{" "}
+                <div className={cx(ui.panelInset, "mt-4 p-4")}>
+                    <p className={cx(ui.hint, "m-0")}>{label}</p>
+                    <p className="text-ink mt-2 mb-0">
+                        <span className="text-primary font-semibold">
+                            #{data.id}
+                        </span>{" "}
                         {data.title}
                     </p>
-                    <p className="hint">
+                    <p className={ui.hint}>
                         Upper: <code>{titleUpper}</code>
                     </p>
-                    <p className="hint">
+                    <p className={ui.hint}>
                         Done: <code>{String(isDone)}</code>
                     </p>
-                    <p className="hint">
-                        Cached — leave this page and come back within 30s and it
-                        should show instantly (staleTime). Last update:{" "}
+                    <p className={ui.hint}>
+                        Cached 30s (staleTime). Last update:{" "}
                         <code>
                             {new Date(dataUpdatedAt).toLocaleTimeString()}
                         </code>

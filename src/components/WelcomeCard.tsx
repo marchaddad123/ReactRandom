@@ -1,5 +1,6 @@
 import { debounce } from "lodash-es"
 import { type ChangeEvent, useEffect, useMemo, useState } from "react"
+import { cx, ui } from "../lib/ui"
 import { useLearnerStore } from "../store/useLearnerStore"
 
 type WelcomeCardProps = {
@@ -7,14 +8,12 @@ type WelcomeCardProps = {
 }
 
 export function WelcomeCard({ currentStack }: WelcomeCardProps) {
-    // Zustand store — like useLearnerStore() in Pinia.
-    const { name, setName } = useLearnerStore()
+    const name = useLearnerStore((state) => state.name)
+    const setName = useLearnerStore((state) => state.setName)
 
-    // Local draft so typing stays snappy while the store update is debounced.
     const [draft, setDraft] = useState(name)
     const [previousName, setPreviousName] = useState(name)
 
-    // Keep local draft in sync if something else changes `name` in the store.
     if (name !== previousName) {
         setPreviousName(name)
         setDraft(name)
@@ -38,24 +37,30 @@ export function WelcomeCard({ currentStack }: WelcomeCardProps) {
     }
 
     return (
-        <section className="card">
-            <p className="eyebrow">React + TypeScript + Tailwind</p>
-            <h1>Welcome, {name || "Vue developer"}</h1>
-            <p>
-                You already know {currentStack}. This card reads{" "}
+        <section className={cx(ui.panel, "animate-rise")}>
+            <p className={ui.eyebrow}>React + TypeScript + Tailwind</p>
+            <h1 className="font-display text-ink m-0 text-2xl tracking-tight">
+                Welcome, {name || "Vue developer"}
+            </h1>
+            <p className={ui.lede}>
+                You already know {currentStack}. This panel reads{" "}
                 <code>name</code> from <code>useLearnerStore</code> (Zustand).
             </p>
 
-            <label htmlFor="welcome-name">
+            <label
+                className={cx(ui.fieldLabel, "mt-4")}
+                htmlFor="welcome-name"
+            >
                 Name from child (debounced store update)
+                <input
+                    id="welcome-name"
+                    className={ui.field}
+                    value={draft}
+                    onChange={handleDraftChange}
+                    placeholder="Type here in the child"
+                />
             </label>
-            <input
-                id="welcome-name"
-                value={draft}
-                onChange={handleDraftChange}
-                placeholder="Type here in the child"
-            />
-            <p className="hint">
+            <p className={ui.hint}>
                 Before: callback prop / Context. Now: Zustand{" "}
                 <code>setName</code> (still debounced).
             </p>

@@ -1,30 +1,33 @@
 import { Activity, useState } from "react"
+import { cx, ui } from "../lib/ui"
 
 function EphemeralPanel({ label }: { label: string }) {
     const [text, setText] = useState("")
     const [count, setCount] = useState(0)
 
     return (
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-            <p className="mb-2 font-semibold text-slate-800">{label}</p>
+        <div className={cx(ui.panelInset, "p-4")}>
+            <p className="text-ink mb-2 font-semibold">{label}</p>
             <label
-                className="mb-1 block text-sm font-semibold"
+                className={ui.fieldLabel}
                 htmlFor={`${label}-text`}
             >
                 Text
+                <input
+                    id={`${label}-text`}
+                    className={ui.field}
+                    value={text}
+                    onChange={(event) => setText(event.target.value)}
+                    placeholder="Type something"
+                />
             </label>
-            <input
-                id={`${label}-text`}
-                value={text}
-                onChange={(event) => setText(event.target.value)}
-                placeholder="Type something"
-            />
-            <p className="hint">
+            <p className={ui.hint}>
                 Local count: <code>{count}</code>
             </p>
-            <div className="actions">
+            <div className={ui.actions}>
                 <button
                     type="button"
+                    className={cx(ui.btn, ui.btnPrimary)}
                     onClick={() => setCount((current) => current + 1)}
                 >
                     +1
@@ -39,20 +42,21 @@ export function ComparePage() {
     const [showActivity, setShowActivity] = useState(true)
 
     return (
-        <section className="card">
-            <p className="eyebrow">Compare</p>
-            <h2>Unmount vs Activity</h2>
-            <p className="hint">
+        <section className={cx(ui.panel, "animate-rise")}>
+            <p className={ui.eyebrow}>Compare</p>
+            <h2 className={ui.title}>Unmount vs Activity</h2>
+            <p className={ui.lede}>
                 Left: conditional render (Vue without keep-alive) — state dies.
                 Right: <code>&lt;Activity&gt;</code> (Vue keep-alive style) —
                 state lives.
             </p>
 
-            <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
                 <div>
-                    <div className="actions mb-3">
+                    <div className={cx(ui.actions, "mt-0 mb-3")}>
                         <button
                             type="button"
+                            className={cx(ui.btn, ui.btnSecondary)}
                             onClick={() =>
                                 setShowUnmount((current) => !current)
                             }
@@ -63,15 +67,17 @@ export function ComparePage() {
                     {showUnmount ? (
                         <EphemeralPanel label="Without Activity" />
                     ) : (
-                        <p className="hint">Unmounted — state was destroyed.</p>
+                        <p className={ui.hint}>
+                            Unmounted — state was destroyed.
+                        </p>
                     )}
                 </div>
 
                 <div>
-                    <div className="actions mb-3">
+                    <div className={cx(ui.actions, "mt-0 mb-3")}>
                         <button
                             type="button"
-                            className="secondary"
+                            className={cx(ui.btn, ui.btnTertiary)}
                             onClick={() =>
                                 setShowActivity((current) => !current)
                             }
@@ -85,7 +91,7 @@ export function ComparePage() {
                         <EphemeralPanel label="With Activity" />
                     </Activity>
                     {!showActivity ? (
-                        <p className="hint">
+                        <p className={ui.hint}>
                             Hidden with Activity — state should still be there
                             when you show it again.
                         </p>

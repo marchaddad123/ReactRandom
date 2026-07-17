@@ -1,7 +1,7 @@
 import { Activity } from "react"
 import { NavLink, useLocation } from "react-router-dom"
-import "./App.css"
 import { Notifications } from "./components/Notifications"
+import { cx, ui } from "./lib/ui"
 import { ComparePage } from "./pages/ComparePage"
 import { CounterPage } from "./pages/CounterPage"
 import { FetchPage } from "./pages/FetchPage"
@@ -17,7 +17,7 @@ const routes = [
     { path: "/compare", label: "Compare", element: <ComparePage /> },
     { path: "/fetch", label: "Fetch", element: <FetchPage /> },
     { path: "/todos", label: "Todos", element: <TodosPage /> },
-    { path: "/report", label: "Report", element: <ReportPage /> }
+    { path: "/report", label: "Users", element: <ReportPage /> }
 ] as const
 
 function App() {
@@ -26,27 +26,30 @@ function App() {
     return (
         <>
             <Notifications />
-            <main className="app">
-                <h1>Learn React</h1>
-                <p className="hint">
-                    App state = <code>Zustand</code>. Context + Redux code is
-                    kept under <code>src/store/*Context</code> and{" "}
-                    <code>src/redux</code> as reference only.
-                </p>
+            <div className={ui.shell}>
+                <header className="animate-nav mb-7">
+                    <p className={ui.eyebrow}>Workshop</p>
+                    <h1 className={ui.brand}>Learn React</h1>
+                    <p className={ui.lede}>
+                        App state = <code>Zustand</code>. Server lists ={" "}
+                        <code>TanStack Query</code>. Context + Redux stay under{" "}
+                        <code>src/store/*Context</code> and{" "}
+                        <code>src/redux</code> as reference only.
+                    </p>
+                </header>
 
-                <nav className="mb-4 flex flex-wrap gap-2">
+                <nav
+                    className="animate-nav mb-6 flex flex-wrap gap-1.5"
+                    style={{ animationDelay: "60ms" }}
+                    aria-label="Primary"
+                >
                     {routes.map((route) => (
                         <NavLink
                             key={route.path}
                             to={route.path}
                             end={route.path === "/"}
                             className={({ isActive }) =>
-                                [
-                                    "rounded-lg px-3 py-2 text-sm font-semibold no-underline",
-                                    isActive
-                                        ? "bg-blue-600 text-white"
-                                        : "bg-slate-200 text-slate-900"
-                                ].join(" ")
+                                cx(ui.navLink, isActive && ui.navLinkActive)
                             }
                         >
                             {route.label}
@@ -54,15 +57,19 @@ function App() {
                     ))}
                 </nav>
 
-                {routes.map((route) => (
-                    <Activity
-                        key={route.path}
-                        mode={pathname === route.path ? "visible" : "hidden"}
-                    >
-                        {route.element}
-                    </Activity>
-                ))}
-            </main>
+                <main>
+                    {routes.map((route) => (
+                        <Activity
+                            key={route.path}
+                            mode={
+                                pathname === route.path ? "visible" : "hidden"
+                            }
+                        >
+                            {route.element}
+                        </Activity>
+                    ))}
+                </main>
+            </div>
         </>
     )
 }
