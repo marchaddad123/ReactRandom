@@ -123,19 +123,19 @@ export function HomePage() {
             <section className={cx(ui.panel, "grid gap-4 sm:grid-cols-3")}>
                 <div>
                     <p className={ui.eyebrow}>Provider</p>
-                    <p className="text-ink m-0 font-semibold capitalize">
+                    <p className="text-ink m-0 font-medium capitalize">
                         {profile?.provider ?? "—"}
                     </p>
                 </div>
                 <div>
                     <p className={ui.eyebrow}>Last login</p>
-                    <p className="text-ink m-0 font-semibold">
+                    <p className="text-ink m-0 font-medium">
                         {formatDate(profile?.lastLoginAt)}
                     </p>
                 </div>
                 <div>
                     <p className={ui.eyebrow}>Member since</p>
-                    <p className="text-ink m-0 font-semibold">
+                    <p className="text-ink m-0 font-medium">
                         {formatDate(profile?.createdAt)}
                     </p>
                 </div>
@@ -199,7 +199,7 @@ export function HomePage() {
                                             />
                                         ) : (
                                             <div
-                                                className="bg-primary/15 text-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-bold"
+                                                className="bg-primary/15 text-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-medium"
                                                 aria-hidden
                                             >
                                                 {initials(
@@ -210,10 +210,10 @@ export function HomePage() {
                                         )}
 
                                         <div className="min-w-0 flex-1">
-                                            <p className="text-ink m-0 truncate font-semibold">
+                                            <p className="text-ink m-0 truncate font-medium">
                                                 {label}
                                                 {isYou ? (
-                                                    <span className="text-primary ml-2 text-xs font-bold tracking-wide uppercase">
+                                                    <span className="text-primary ml-2 text-xs font-medium tracking-wide uppercase">
                                                         You
                                                     </span>
                                                 ) : null}

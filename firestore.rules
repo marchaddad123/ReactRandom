@@ -16,6 +16,26 @@ service cloud.firestore {
           allow create, delete: if request.auth != null
             && request.auth.uid == likerUid;
         }
+
+        // Threaded comments: author can create/delete their own; no body edits.
+        match /comments/{commentId} {
+          allow read: if request.auth != null;
+          allow create: if request.auth != null
+            && request.auth.uid == request.resource.data.authorUid;
+          allow delete: if request.auth != null
+            && request.auth.uid == resource.data.authorUid;
+          allow update: if false;
+
+          // Reddit-style up/down votes — only your own vote doc.
+          match /votes/{voterUid} {
+            allow read: if request.auth != null;
+            allow create, update: if request.auth != null
+              && request.auth.uid == voterUid
+              && request.resource.data.value in [1, -1];
+            allow delete: if request.auth != null
+              && request.auth.uid == voterUid;
+          }
+        }
       }
     }
   }

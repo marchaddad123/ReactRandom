@@ -28,13 +28,16 @@
 
     --color-danger: #b42318;
     --color-success: #067647;
+    /* Vote accents — clear orange / blue (not danger-red / teal-cyan) */
+    --color-upvote: #ff6a00;
+    --color-downvote: #4f6ef7;
 
     --animate-rise: rise 0.45s ease-out forwards;
     --animate-nav: nav-in 0.4s ease-out forwards;
     --animate-heart-bump: heart-bump 0.35s ease-out;
 
-    /* Same cubic used in the Nuxt modal theme */
-    --ease-modal-cubic: cubic-bezier(0, 0, 0.4, 1.1);
+    /* Nuxt Modal slide easing */
+    --ease-modal-cubic: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 @keyframes rise {
@@ -247,5 +250,24 @@
         height: min(14.5rem, 42vh);
         --num-columns: 6;
         --emoji-size: 1.25rem;
+    }
+}
+
+/* Modal / Dialog body lock while overlay is open */
+html:has([data-modal-ui]) {
+    overflow: hidden;
+    overscroll-behavior: none;
+}
+
+/* Reddit-style comment nest indent — tighter on phones */
+.comment-thread {
+    --comment-indent-step: 0.85rem;
+    --comment-indent-cap: 4.25rem;
+}
+
+@media (max-width: 639px) {
+    .comment-thread {
+        --comment-indent-step: 0.4rem;
+        --comment-indent-cap: 1.2rem;
     }
 }

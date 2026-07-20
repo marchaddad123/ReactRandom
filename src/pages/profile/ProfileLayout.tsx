@@ -150,7 +150,7 @@ export function ProfileLayout() {
                         />
                     ) : (
                         <div
-                            className="bg-primary/15 text-primary font-display flex h-16 w-16 items-center justify-center rounded-2xl text-xl font-bold"
+                            className="bg-primary/15 text-primary font-display flex h-16 w-16 items-center justify-center rounded-2xl text-xl font-medium"
                             aria-hidden
                         >
                             {initials(profile.displayName, profile.email)}
@@ -160,7 +160,7 @@ export function ProfileLayout() {
                         <h2 className={cx(ui.title, "text-[1.65rem]")}>
                             {profile.displayName || "Profile"}
                         </h2>
-                        <p className="text-primary m-0 text-sm font-semibold">
+                        <p className="text-primary m-0 text-sm font-medium">
                             /{profile.username}
                         </p>
                         {isOwn && profile.email ? (

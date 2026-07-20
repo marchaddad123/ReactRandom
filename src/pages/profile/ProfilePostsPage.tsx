@@ -1,7 +1,10 @@
+import { ChatBubbleLeftIcon } from "@heroicons/react/24/outline"
 import { type FormEvent, useEffect, useState } from "react"
 import { useOutletContext } from "react-router-dom"
 import { EmojiTextarea } from "../../components/EmojiTextarea"
+import { PostDetailModal } from "../../components/PostDetailModal"
 import { PostLikeButton } from "../../components/PostLikeButton"
+import { formatCompactCount } from "../../lib/format"
 import { createPost, listPostsForUser } from "../../lib/posts"
 import { cx, ui } from "../../lib/ui"
 import { useAuthStore } from "../../store/useAuthStore"
@@ -19,6 +22,9 @@ export function ProfilePostsPage() {
     const [loading, setLoading] = useState(true)
     const [body, setBody] = useState("")
     const [saving, setSaving] = useState(false)
+    const [openPostId, setOpenPostId] = useState<string | null>(null)
+
+    const openPost = posts.find((p) => p.id === openPostId) ?? null
 
     useEffect(() => {
         let cancelled = false
@@ -69,9 +75,9 @@ export function ProfilePostsPage() {
         }
     }
 
-    function updatePostLikes(
+    function patchPost(
         postId: string,
-        next: Pick<Post, "likeCount" | "likedByMe">
+        next: Partial<Pick<Post, "likeCount" | "likedByMe" | "commentCount">>
     ) {
         setPosts((current) =>
             current.map((post) =>
@@ -81,13 +87,13 @@ export function ProfilePostsPage() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className={ui.stack}>
             {isOwn ? (
                 <section className={ui.panel}>
                     <p className={ui.eyebrow}>New post</p>
                     <h3 className={ui.title}>Share an update</h3>
                     <form
-                        className="mt-4 space-y-3"
+                        className={cx(ui.stackTight, "mt-4")}
                         onSubmit={handleSubmit}
                     >
                         <label className={ui.fieldLabel}>
@@ -104,7 +110,7 @@ export function ProfilePostsPage() {
                             </div>
                         </label>
                         <div className="flex flex-wrap items-center justify-between gap-2">
-                            <p className="text-muted m-0 text-xs">
+                            <p className={ui.meta}>
                                 {body.length}/{POST_MAX_LENGTH}
                             </p>
                             <button
@@ -126,7 +132,7 @@ export function ProfilePostsPage() {
                         <h3 className={ui.title}>Posts</h3>
                     </div>
                     {!loading ? (
-                        <p className="text-muted m-0 text-sm">
+                        <p className={cx(ui.meta, "text-sm")}>
                             {posts.length}{" "}
                             {posts.length === 1 ? "post" : "posts"}
                         </p>
@@ -134,42 +140,78 @@ export function ProfilePostsPage() {
                 </div>
 
                 {loading ? (
-                    <p className="text-muted m-0 text-sm">Loading posts…</p>
+                    <p className={cx(ui.hint, "mt-0")}>Loading posts…</p>
                 ) : null}
 
                 {!loading && posts.length === 0 ? (
-                    <p className="text-muted m-0 text-sm">Nothing to show.</p>
+                    <p className={cx(ui.hint, "mt-0")}>Nothing to show.</p>
                 ) : null}
 
                 {!loading && posts.length > 0 ? (
-                    <ul className="m-0 list-none space-y-3 p-0">
+                    <ul className={cx(ui.stackTight, "m-0 list-none p-0")}>
                         {posts.map((post) => (
                             <li
                                 key={post.id}
                                 className="border-line rounded-xl border px-4 py-3"
                             >
-                                <p className="text-ink m-0 whitespace-pre-wrap">
+                                <p
+                                    className={cx(
+                                        ui.body,
+                                        "whitespace-pre-wrap"
+                                    )}
+                                >
                                     {post.body}
                                 </p>
-                                <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-                                    <p className="text-muted m-0 text-xs">
+                                <div
+                                    className={cx(
+                                        ui.afterBody,
+                                        "flex flex-wrap items-center justify-between gap-2"
+                                    )}
+                                >
+                                    <p className={ui.meta}>
                                         {formatDate(post.createdAt)}
                                     </p>
-                                    {viewerUid ? (
-                                        <PostLikeButton
-                                            post={post}
-                                            likerUid={viewerUid}
-                                            onChange={(next) =>
-                                                updatePostLikes(post.id, next)
+                                    <div className="flex items-center gap-1">
+                                        <button
+                                            type="button"
+                                            className="text-muted hover:text-ink inline-flex shrink-0 cursor-pointer items-center gap-1 rounded-lg border-0 bg-transparent px-1 text-sm font-medium transition-colors"
+                                            aria-label={`Open comments, ${post.commentCount} comments`}
+                                            onClick={() =>
+                                                setOpenPostId(post.id)
                                             }
-                                        />
-                                    ) : null}
+                                        >
+                                            <ChatBubbleLeftIcon className="h-5 w-5" />
+                                            <span className="w-4 leading-none tabular-nums">
+                                                {formatCompactCount(
+                                                    post.commentCount
+                                                )}
+                                            </span>
+                                        </button>
+                                        {viewerUid ? (
+                                            <PostLikeButton
+                                                post={post}
+                                                likerUid={viewerUid}
+                                                onChange={(next) =>
+                                                    patchPost(post.id, next)
+                                                }
+                                            />
+                                        ) : null}
+                                    </div>
                                 </div>
                             </li>
                         ))}
                     </ul>
                 ) : null}
             </section>
+
+            {openPost ? (
+                <PostDetailModal
+                    key={openPost.id}
+                    post={openPost}
+                    onClose={() => setOpenPostId(null)}
+                    onPostChange={(next) => patchPost(openPost.id, next)}
+                />
+            ) : null}
         </div>
     )
 }

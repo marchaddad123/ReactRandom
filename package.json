@@ -15,6 +15,7 @@
         "check": "npm run typecheck && npm run lint && npm run format:check"
     },
     "dependencies": {
+        "@headlessui/react": "^2.2.10",
         "@heroicons/react": "^2.2.0",
         "canvas-confetti": "^1.9.4",
         "country-flag-emoji-polyfill": "^0.1.8",

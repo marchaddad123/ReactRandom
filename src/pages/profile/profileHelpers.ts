@@ -1,4 +1,5 @@
 import { getUserProfile, getUserProfileByUsername } from "../../lib/userProfile"
+import { formatDate } from "../../lib/format"
 import type { UserProfile } from "../../types/userProfile"
 
 export type ProfileOutletContext = {
@@ -6,17 +7,7 @@ export type ProfileOutletContext = {
     isOwn: boolean
 }
 
-export function formatDate(iso: string | undefined) {
-    if (!iso) return "—"
-    try {
-        return new Intl.DateTimeFormat(undefined, {
-            dateStyle: "medium",
-            timeStyle: "short"
-        }).format(new Date(iso))
-    } catch {
-        return iso
-    }
-}
+export { formatDate }
 
 export function initials(
     name: string | null | undefined,

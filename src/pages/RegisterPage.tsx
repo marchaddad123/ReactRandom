@@ -195,7 +195,7 @@ export function RegisterPage() {
 
                 <div className="my-6 flex items-center gap-3">
                     <div className="bg-line h-px flex-1" />
-                    <span className="text-muted text-xs font-semibold tracking-wide uppercase">
+                    <span className="text-muted text-xs font-medium tracking-wide uppercase">
                         or
                     </span>
                     <div className="bg-line h-px flex-1" />
@@ -214,7 +214,7 @@ export function RegisterPage() {
                     Already registered?{" "}
                     <Link
                         to="/login"
-                        className="text-primary font-semibold no-underline hover:underline"
+                        className="text-primary font-medium no-underline hover:underline"
                     >
                         Sign in
                     </Link>

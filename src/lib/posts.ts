@@ -14,6 +14,7 @@ import {
     type QueryDocumentSnapshot
 } from "firebase/firestore"
 import { POST_MAX_LENGTH, type Post } from "../types/post"
+import { countCommentsForPost } from "./comments"
 import { db } from "./firebase"
 
 function toIso(value: unknown): string {
@@ -63,7 +64,10 @@ async function mapPostDocs(
     return Promise.all(
         docs.map(async (d) => {
             const data = d.data()
-            const likes = await loadLikeState(authorUid, d.id, viewerUid)
+            const [likes, commentCount] = await Promise.all([
+                loadLikeState(authorUid, d.id, viewerUid),
+                countCommentsForPost(authorUid, d.id)
+            ])
             return {
                 id: d.id,
                 authorUid: data.authorUid ?? authorUid,
@@ -71,7 +75,8 @@ async function mapPostDocs(
                 body: data.body ?? "",
                 createdAt: toIso(data.createdAt),
                 likeCount: likes.likeCount,
-                likedByMe: likes.likedByMe
+                likedByMe: likes.likedByMe,
+                commentCount
             }
         })
     )
@@ -125,7 +130,8 @@ export async function createPost(input: {
             body,
             createdAt: nowIso,
             likeCount: 0,
-            likedByMe: false
+            likedByMe: false,
+            commentCount: 0
         }
     } catch (error) {
         const code =

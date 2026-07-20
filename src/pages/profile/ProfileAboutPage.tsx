@@ -43,38 +43,36 @@ export function ProfileAboutPage() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className={ui.stack}>
             <section className={ui.panel}>
                 <h3 className={ui.title}>Basics</h3>
                 <dl className="mt-4 grid gap-4 sm:grid-cols-2">
                     <div>
                         <dt className={ui.eyebrow}>Username</dt>
-                        <dd className="text-ink m-0 font-semibold">
-                            @{profile.username}
-                        </dd>
+                        <dd className={ui.value}>@{profile.username}</dd>
                     </div>
                     <div>
                         <dt className={ui.eyebrow}>Provider</dt>
-                        <dd className="text-ink m-0 font-semibold capitalize">
+                        <dd className={cx(ui.value, "capitalize")}>
                             {profile.provider}
                         </dd>
                     </div>
                     <div>
                         <dt className={ui.eyebrow}>Member since</dt>
-                        <dd className="text-ink m-0 font-semibold">
+                        <dd className={ui.value}>
                             {formatDate(profile.createdAt)}
                         </dd>
                     </div>
                     <div>
                         <dt className={ui.eyebrow}>Last login</dt>
-                        <dd className="text-ink m-0 font-semibold">
+                        <dd className={ui.value}>
                             {formatDate(profile.lastLoginAt)}
                         </dd>
                     </div>
                     {isOwn ? (
                         <div className="sm:col-span-2">
                             <dt className={ui.eyebrow}>User ID</dt>
-                            <dd className="text-ink m-0 font-mono text-sm break-all">
+                            <dd className={cx(ui.value, "font-mono break-all")}>
                                 {profile.uid}
                             </dd>
                         </div>
@@ -86,7 +84,8 @@ export function ProfileAboutPage() {
                 <section className={ui.panel}>
                     <h3 className={ui.title}>Edit display name</h3>
                     <p className={ui.hint}>
-                        Your URL stays <strong>/{profile.username}</strong> —
+                        Your URL stays{" "}
+                        <span className="text-ink">/{profile.username}</span> —
                         only the display name changes.
                     </p>
                     <form

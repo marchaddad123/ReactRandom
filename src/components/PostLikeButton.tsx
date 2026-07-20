@@ -71,7 +71,7 @@ export function PostLikeButton({
         <button
             type="button"
             className={cx(
-                "inline-flex shrink-0 cursor-pointer items-center gap-1 self-end rounded-lg border-0 bg-transparent px-1 text-sm font-semibold transition-colors",
+                "inline-flex shrink-0 cursor-pointer items-center gap-1 self-end rounded-lg border-0 bg-transparent px-1 text-sm font-medium transition-colors",
                 post.likedByMe ? "text-danger" : "text-muted hover:text-danger"
             )}
             aria-pressed={post.likedByMe}

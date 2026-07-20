@@ -102,13 +102,13 @@ function AppShell() {
                             />
                         ) : (
                             <div
-                                className="bg-primary/15 text-primary flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold"
+                                className="bg-primary/15 text-primary flex h-8 w-8 items-center justify-center rounded-full text-xs font-medium"
                                 aria-hidden
                             >
                                 {label.slice(0, 1).toUpperCase()}
                             </div>
                         )}
-                        <span className="text-ink hidden max-w-[10rem] truncate text-sm font-semibold sm:inline">
+                        <span className="text-ink hidden max-w-[10rem] truncate text-sm font-medium sm:inline">
                             {label}
                         </span>
                         <button

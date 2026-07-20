@@ -37,6 +37,24 @@ service cloud.firestore {
           allow create, delete: if request.auth != null
             && request.auth.uid == likerUid;
         }
+
+        match /comments/{commentId} {
+          allow read: if request.auth != null;
+          allow create: if request.auth != null
+            && request.auth.uid == request.resource.data.authorUid;
+          allow delete: if request.auth != null
+            && request.auth.uid == resource.data.authorUid;
+          allow update: if false;
+
+          match /votes/{voterUid} {
+            allow read: if request.auth != null;
+            allow create, update: if request.auth != null
+              && request.auth.uid == voterUid
+              && request.resource.data.value in [1, -1];
+            allow delete: if request.auth != null
+              && request.auth.uid == voterUid;
+          }
+        }
       }
     }
   }
@@ -85,6 +103,6 @@ npm run check        # typecheck + lint + format check
 ## Stack
 
 - **Auth:** Firebase Auth (Google + email/password)
-- **Profiles / posts:** Firestore `users/{uid}` and `users/{uid}/posts`
+- **Profiles / posts / comments:** Firestore `users/{uid}`, `…/posts`, `…/comments`
 - **Client state:** Zustand
 - **Routing:** React Router (`/:username`, `/:username/posts`)
