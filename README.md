@@ -1,90 +1,56 @@
-# Learn React Next
+# ReactRandom
 
-This first project is intentionally **React only**. Despite the folder name, it
-contains no Next.js, server-side rendering, routing, API, Tailwind, or state
-management library yet.
-
-The goal is to learn React fundamentals first and build a separate Next.js
-project afterward.
+Authenticated React app built with Vite, Zustand, React Router, and Firebase
+(Auth + Firestore).
 
 ## Requirements
 
 - Node.js 20.19+ or 22.12+
 - npm
+- A Firebase project with **Email/Password** and **Google** sign-in enabled
+- A Firestore database
 
-The included `.nvmrc` selects Node 22 when using NVM.
+## Setup
 
-## Start the project
+1. Copy `.env.example` to `.env.local` and fill in your Firebase web config.
+2. In Firebase Console → Authentication → Settings → Authorized domains, add
+   `localhost` and your production host (e.g. `mark-haddad-react.vercel.app`).
+3. Create Firestore and publish rules. Signed-in users can **list** profiles;
+   each user can only **write** their own doc:
+
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
+```
+
+4. Install and run:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open the local URL printed in the terminal, normally
-`http://localhost:5173`.
-
-## Available commands
+## Scripts
 
 ```bash
-npm run dev          # Start the Vite development server
-npm run build        # Type-check and create a production build
-npm run preview      # Preview the production build
-npm run typecheck    # Run TypeScript checks
-npm run lint         # Check code with ESLint
-npm run lint:fix     # Fix ESLint issues where possible
-npm run format       # Format the project with Prettier
-npm run format:check # Check formatting without changing files
-npm run check        # TypeScript + ESLint + Prettier checks
+npm run dev          # Vite development server
+npm run build        # Type-check and production build
+npm run preview      # Preview production build
+npm run typecheck    # TypeScript only
+npm run lint         # ESLint
+npm run check        # typecheck + lint + format check
 ```
 
-## What was added
+## Stack
 
-1. **Vite** provides the development server and production build.
-2. **React** renders the user interface.
-3. **TypeScript** adds types to components, props, state, and events.
-4. **ESLint** checks code quality and React Hooks rules.
-5. **Prettier** handles code formatting separately from ESLint.
-6. **VS Code settings** enable format-on-save and ESLint fixes when the
-   recommended extensions are installed.
-
-## Important files
-
-- `index.html`: the HTML entry point containing `<div id="root">`.
-- `src/main.tsx`: mounts the React application into `#root`.
-- `src/App.tsx`: the main component with state, events, and a derived value.
-- `src/components/WelcomeCard.tsx`: a child component with typed props.
-- `src/index.css`: global CSS.
-- `src/App.css`: component/page CSS.
-- `vite.config.ts`: Vite configuration and React plugin.
-- `eslint.config.js`: modern ESLint flat configuration.
-- `prettier.config.mjs`: Prettier formatting rules.
-- `tsconfig.app.json`: TypeScript configuration for browser code.
-- `tsconfig.node.json`: TypeScript configuration for Vite's Node-side config.
-
-## Vue to React mapping used here
-
-| Vue / Nuxt         | React in this project                  |
-| ------------------ | -------------------------------------- |
-| `App.vue`          | `App.tsx`                              |
-| `main.ts`          | `main.tsx`                             |
-| `ref()`            | `useState()`                           |
-| basic `computed()` | calculate a value during render        |
-| `v-model`          | `value` plus `onChange`                |
-| `@click`           | `onClick`                              |
-| `defineProps()`    | typed function parameters              |
-| `<template>`       | JSX returned by the component function |
-| `class`            | `className`                            |
-
-## First learning target
-
-Open `src/App.tsx` and compare it with how you would write the same feature in a
-Vue `<script setup lang="ts">` component. The project demonstrates:
-
-- local reactive state,
-- a controlled input,
-- typed DOM events,
-- a derived value,
-- click handlers,
-- a child component,
-- typed props.
+- **Auth:** Firebase Auth (Google + email/password)
+- **Profiles / login history:** Firestore `users/{uid}`
+- **Client state:** Zustand
+- **Routing:** React Router (protected Home + Profile)

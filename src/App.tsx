@@ -1,54 +1,69 @@
-import { NavLink, Route, Routes } from "react-router-dom"
+import { NavLink, Navigate, Outlet, Route, Routes } from "react-router-dom"
 import { Notifications } from "./components/Notifications"
+import { ProtectedRoute } from "./components/ProtectedRoute"
 import { cx, ui } from "./lib/ui"
-import { ComparePage } from "./pages/ComparePage"
-import { CounterPage } from "./pages/CounterPage"
-import { FetchPage } from "./pages/FetchPage"
 import { HomePage } from "./pages/HomePage"
-import { NotesPage } from "./pages/NotesPage"
-import { OverlaysPage } from "./pages/OverlaysPage"
-import { ReportPage } from "./pages/ReportPage"
-import { TodosPage } from "./pages/TodosPage"
-import { UsersPage } from "./pages/Users"
+import { LoginPage } from "./pages/LoginPage"
+import { ProfilePage } from "./pages/ProfilePage"
+import { ProfileRedirect } from "./pages/ProfileRedirect"
+import { RegisterPage } from "./pages/RegisterPage"
+import { useAuthStore } from "./store/useAuthStore"
+import { useNotificationStore } from "./store/useNotificationStore"
 
-const routes = [
-    { path: "/", label: "Home", element: <HomePage /> },
-    { path: "/notes", label: "Notes", element: <NotesPage /> },
-    { path: "/counter", label: "Counter", element: <CounterPage /> },
-    { path: "/compare", label: "Compare", element: <ComparePage /> },
-    { path: "/fetch", label: "Fetch", element: <FetchPage /> },
-    { path: "/todos", label: "Todos", element: <TodosPage /> },
-    { path: "/users", label: "Users", element: <UsersPage /> },
-    { path: "/report", label: "Reports", element: <ReportPage /> },
-    { path: "/overlays", label: "Overlays", element: <OverlaysPage /> }
-] as const
+/**
+ * Top bar + page hole for logged-in users only
+ * (Home and Profile render inside <Outlet /> below).
+ */
+function AppShell() {
+    const user = useAuthStore((state) => state.user)
+    const profile = useAuthStore((state) => state.profile)
+    const profileSynced = useAuthStore((state) => state.profileSynced)
+    const signOut = useAuthStore((state) => state.signOut)
+    const notify = useNotificationStore((state) => state.updateNotification)
 
-function App() {
+    const label =
+        profile?.displayName ||
+        user?.displayName ||
+        user?.email?.split("@")[0] ||
+        "Account"
+    const photoURL = profile?.photoURL ?? user?.photoURL
+    // Wait for Firestore sync before using /username (avoids "not found" race).
+    const profilePath =
+        profileSynced && profile?.username ? `/${profile.username}` : "/profile"
+
+    async function handleSignOut() {
+        try {
+            await signOut()
+            notify({ message: "Signed out.", error: false })
+        } catch {
+            notify({ message: "Could not sign out.", error: true })
+        }
+    }
+
     return (
-        <>
-            <Notifications />
-            <div className={ui.shell}>
-                <header className="animate-nav mb-7">
-                    <p className={ui.eyebrow}>Workshop</p>
-                    <h1 className={ui.brand}>Learn React</h1>
-                    <p className={ui.lede}>
-                        App state = <code>Zustand</code>. Server lists ={" "}
-                        <code>TanStack Query</code>. Context + Redux stay under{" "}
-                        <code>src/store/*Context</code> and{" "}
-                        <code>src/redux</code> as reference only.
-                    </p>
-                </header>
-
-                <nav
-                    className="animate-nav mb-6 flex flex-wrap gap-1.5"
-                    style={{ animationDelay: "60ms" }}
-                    aria-label="Primary"
+        <div className="min-h-screen">
+            <header className="border-line/80 bg-surface/75 animate-nav sticky top-0 z-40 border-b backdrop-blur-md">
+                <div
+                    className={cx(
+                        ui.shell,
+                        "flex items-center justify-between gap-4 py-3.5"
+                    )}
                 >
-                    {routes.map((route) => (
+                    <NavLink
+                        to="/"
+                        end
+                        className={ui.brandMark}
+                    >
+                        ReactRandom
+                    </NavLink>
+
+                    <nav
+                        className="flex flex-wrap items-center gap-1"
+                        aria-label="Primary"
+                    >
                         <NavLink
-                            key={route.path}
-                            to={route.path}
-                            end={route.path === "/"}
+                            to="/"
+                            end
                             className={({ isActive }) =>
                                 cx(
                                     ui.navLink,
@@ -58,23 +73,115 @@ function App() {
                                 )
                             }
                         >
-                            {route.label}
+                            Home
                         </NavLink>
-                    ))}
-                </nav>
+                        <NavLink
+                            to={profilePath}
+                            className={({ isActive }) =>
+                                cx(
+                                    ui.navLink,
+                                    isActive
+                                        ? ui.navLinkActive
+                                        : ui.navLinkInactive
+                                )
+                            }
+                        >
+                            Profile
+                        </NavLink>
+                    </nav>
 
-                <main>
-                    <Routes>
-                        {routes.map((route) => (
-                            <Route
-                                key={route.path}
-                                path={route.path}
-                                element={route.element}
+                    <div className="flex items-center gap-2.5">
+                        {photoURL ? (
+                            <img
+                                src={photoURL}
+                                alt=""
+                                className="border-line h-8 w-8 rounded-full border object-cover"
+                                referrerPolicy="no-referrer"
                             />
-                        ))}
-                    </Routes>
-                </main>
-            </div>
+                        ) : (
+                            <div
+                                className="bg-primary/15 text-primary flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold"
+                                aria-hidden
+                            >
+                                {label.slice(0, 1).toUpperCase()}
+                            </div>
+                        )}
+                        <span className="text-ink hidden max-w-[10rem] truncate text-sm font-semibold sm:inline">
+                            {label}
+                        </span>
+                        <button
+                            type="button"
+                            className={cx(
+                                ui.btn,
+                                ui.btnGhost,
+                                "px-2.5 py-1.5 text-sm"
+                            )}
+                            onClick={handleSignOut}
+                        >
+                            Sign out
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <main className={cx(ui.shell, "py-8 pb-16")}>
+                <Outlet />
+            </main>
+        </div>
+    )
+}
+
+function App() {
+    return (
+        <>
+            <Notifications />
+            <Routes>
+                {/* Anyone can open these (no login required). */}
+                <Route
+                    path="/login"
+                    element={<LoginPage />}
+                />
+                <Route
+                    path="/register"
+                    element={<RegisterPage />}
+                />
+
+                {/*
+                  Nested private area:
+                  ProtectedRoute checks "are we logged in?"
+                  AppShell draws the top bar
+                  then Home or Profile fills the middle
+                */}
+                <Route element={<ProtectedRoute />}>
+                    <Route element={<AppShell />}>
+                        <Route
+                            path="/"
+                            element={<HomePage />}
+                        />
+                        {/* Shortcut: /profile → /your-username */}
+                        <Route
+                            path="/profile"
+                            element={<ProfileRedirect />}
+                        />
+                        {/* Public-within-app profile pages: /ada, /bob, … */}
+                        <Route
+                            path="/:username"
+                            element={<ProfilePage />}
+                        />
+                    </Route>
+                </Route>
+
+                {/* Unknown URL → send them home (Home is still protected). */}
+                <Route
+                    path="*"
+                    element={
+                        <Navigate
+                            to="/"
+                            replace
+                        />
+                    }
+                />
+            </Routes>
         </>
     )
 }

@@ -4,28 +4,24 @@
     --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
     --font-display: "Outfit", ui-sans-serif, system-ui, sans-serif;
 
-    --color-primary: #0f4c5c;
-    --color-primary-fg: #f4f7f6;
-    --color-secondary: #5c6b73;
-    --color-secondary-fg: #f4f7f6;
-    --color-tertiary: #e4ebe7;
-    --color-tertiary-fg: #12232b;
+    --color-primary: #0b4f5c;
+    --color-primary-fg: #f3f8f7;
+    --color-secondary: #4a5c66;
+    --color-secondary-fg: #f3f8f7;
+    --color-tertiary: #dce6e2;
+    --color-tertiary-fg: #102028;
 
-    --color-ink: #12232b;
-    --color-muted: #5c6b73;
-    --color-line: #cfd8d3;
-    --color-surface: #fbfcfc;
-    --color-canvas: #eef3f0;
+    --color-ink: #102028;
+    --color-muted: #5a6b74;
+    --color-line: #c5d2cd;
+    --color-surface: #f7faf9;
+    --color-canvas: #e8eef0;
 
     --color-danger: #b42318;
     --color-success: #067647;
 
-    /* forwards + transform:none at end — avoids leftover transform clipping descenders */
     --animate-rise: rise 0.45s ease-out forwards;
     --animate-nav: nav-in 0.4s ease-out forwards;
-
-    /* Nuxt Modal slide easing */
-    --ease-modal-cubic: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 @keyframes rise {
@@ -58,6 +54,7 @@
         font-synthesis: none;
         text-rendering: optimizeLegibility;
         -webkit-font-smoothing: antialiased;
+        scrollbar-gutter: stable;
     }
 
     body {
@@ -67,22 +64,22 @@
         background-color: var(--color-canvas);
         background-image:
             radial-gradient(
-                ellipse 80% 50% at 10% -10%,
-                color-mix(in oklab, var(--color-primary) 18%, transparent),
-                transparent 55%
+                ellipse 90% 55% at 0% -5%,
+                color-mix(in oklab, var(--color-primary) 22%, transparent),
+                transparent 58%
             ),
             radial-gradient(
-                ellipse 60% 40% at 100% 0%,
-                color-mix(in oklab, var(--color-secondary) 14%, transparent),
-                transparent 50%
+                ellipse 70% 45% at 100% 0%,
+                color-mix(in oklab, #2a6f7a 16%, transparent),
+                transparent 52%
             ),
             linear-gradient(
-                160deg,
-                color-mix(in oklab, var(--color-tertiary) 55%, white) 0%,
-                var(--color-canvas) 42%,
+                165deg,
+                color-mix(in oklab, var(--color-tertiary) 40%, white) 0%,
+                var(--color-canvas) 45%,
                 color-mix(
                         in oklab,
-                        var(--color-primary) 6%,
+                        var(--color-primary) 7%,
                         var(--color-canvas)
                     )
                     100%
@@ -96,43 +93,69 @@
         font: inherit;
     }
 
-    code {
-        @apply bg-tertiary/80 text-ink rounded px-1.5 py-0.5 text-[0.9em];
+    a {
+        color: inherit;
     }
 }
 
-/* Nuxt DialogUI / Modal body lock */
-html {
-    scrollbar-gutter: stable;
-}
-
-html:has([data-dialog-ui]),
-html:has([data-modal-ui]) {
+.auth-screen {
+    position: relative;
+    display: flex;
+    min-height: 100vh;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
     overflow: hidden;
-    overscroll-behavior: none;
 }
 
-.removeOverflow {
-    overflow: unset !important;
+.auth-screen::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(
+            ellipse 70% 50% at 20% 20%,
+            color-mix(in oklab, var(--color-primary) 28%, transparent),
+            transparent 60%
+        ),
+        radial-gradient(
+            ellipse 55% 45% at 85% 75%,
+            color-mix(in oklab, #1a6570 22%, transparent),
+            transparent 55%
+        ),
+        linear-gradient(150deg, #0a3038 0%, #123a44 40%, #1a4a52 100%);
+    z-index: 0;
 }
 
-.is_animating {
-    transition-property: all;
-    transition-duration: 200ms;
-    transition-timing-function: ease-out;
+.auth-screen::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    z-index: 0;
+    pointer-events: none;
 }
 
-.scrollbar-none {
-    scrollbar-width: none;
+.auth-panel {
+    position: relative;
+    z-index: 1;
+    width: min(100%, 26rem);
+    border-radius: 1.25rem;
+    border: 1px solid color-mix(in oklab, white 18%, transparent);
+    background: color-mix(in oklab, var(--color-surface) 94%, white);
+    padding: 2rem 1.75rem 1.75rem;
+    box-shadow:
+        0 24px 48px color-mix(in oklab, black 28%, transparent),
+        0 1px 0 color-mix(in oklab, white 70%, transparent);
 }
 
-.scrollbar-none::-webkit-scrollbar {
-    display: none;
+.auth-panel .font-display,
+.auth-panel h1 {
+    color: var(--color-ink);
 }
 
 /*
  * react-transition-group needs stable class names for enter/exit.
- * Layout for the toast stack uses Tailwind in Notifications.tsx.
  */
 .notification-enter-active,
 .notification-exit-active {
