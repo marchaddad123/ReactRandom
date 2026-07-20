@@ -1,0 +1,17 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Profile docs: anyone signed in can read; only you can write yours.
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
+
+      // Posts under that user: users/{uid}/posts/{postId}
+      match /posts/{postId} {
+        allow read: if request.auth != null;
+        allow create, update, delete: if request.auth != null
+          && request.auth.uid == userId;
+      }
+    }
+  }
+}

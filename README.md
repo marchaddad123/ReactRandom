@@ -12,7 +12,8 @@ Authenticated React app built with Vite, Zustand, React Router, and Firebase
 
 ## Setup
 
-1. Firebase config is hardcoded in `src/lib/firebase.ts` for now.
+1. Copy `.env.example` → `.env.local` and fill in your Firebase web config
+   (from Firebase Console → Project settings → Your apps).
 2. In Firebase Console → Authentication → Settings → Authorized domains, add
    `localhost` and your production host (e.g. `mark-haddad-react.vercel.app`).
 3. Create Firestore and publish rules. Signed-in users can **list** profiles and
@@ -28,13 +29,7 @@ service cloud.firestore {
 
       match /posts/{postId} {
         allow read: if request.auth != null;
-        allow create: if request.auth != null
-          && request.auth.uid == userId
-          && request.resource.data.authorUid == request.auth.uid
-          && request.resource.data.body is string
-          && request.resource.data.body.size() > 0
-          && request.resource.data.body.size() <= 2000;
-        allow update, delete: if request.auth != null
+        allow create, update, delete: if request.auth != null
           && request.auth.uid == userId;
       }
     }
@@ -42,12 +37,33 @@ service cloud.firestore {
 }
 ```
 
+Same file lives at [`firestore.rules`](firestore.rules) — copy that into Firebase Console → Firestore → **Rules** → **Publish**.
+
 4. Install and run:
 
 ```bash
 npm install
 npm run dev
 ```
+
+## Vercel / production env
+
+Vite inlines `VITE_*` at **build** time. `.env.local` is gitignored and is
+**not** on Vercel.
+
+In Vercel → Project → **Settings → Environment Variables**, add the same keys
+for Production (and Preview if you want):
+
+| Name | Example |
+|------|---------|
+| `VITE_FIREBASE_API_KEY` | from Firebase |
+| `VITE_FIREBASE_AUTH_DOMAIN` | `reactrandom.firebaseapp.com` |
+| `VITE_FIREBASE_PROJECT_ID` | `reactrandom` |
+| `VITE_FIREBASE_STORAGE_BUCKET` | `….firebasestorage.app` |
+| `VITE_FIREBASE_MESSAGING_SENDER_ID` | numbers |
+| `VITE_FIREBASE_APP_ID` | `1:…:web:…` |
+
+Then **Redeploy** so the new build picks them up.
 
 ## Scripts
 
