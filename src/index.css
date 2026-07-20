@@ -1,8 +1,17 @@
 @import "tailwindcss";
 
 @theme {
-    --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
-    --font-display: "Outfit", ui-sans-serif, system-ui, sans-serif;
+    /*
+     * Figtree for UI text, then emoji fonts (same idea as Nuxt / Tailwind 3).
+     * Twemoji Country Flags + polyfill cover flag emoji on Windows.
+     */
+    --font-sans:
+        "Twemoji Country Flags", "Figtree", "Twemoji Mozilla",
+        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+        "Noto Color Emoji", "EmojiOne Color", "Android Emoji", sans-serif;
+    --font-display:
+        "Outfit", "Twemoji Country Flags", "Twemoji Mozilla",
+        "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
 
     --color-primary: #0b4f5c;
     --color-primary-fg: #f3f8f7;
@@ -22,6 +31,9 @@
 
     --animate-rise: rise 0.45s ease-out forwards;
     --animate-nav: nav-in 0.4s ease-out forwards;
+
+    /* Same cubic used in the Nuxt modal theme */
+    --ease-modal-cubic: cubic-bezier(0, 0, 0.4, 1.1);
 }
 
 @keyframes rise {
@@ -191,4 +203,36 @@
 
 .notification-move {
     transition: transform 300ms ease-in-out;
+}
+
+/* emoji-picker-element: overlay panel (absolute) — does not push page layout */
+.emoji-picker-shell {
+    width: min(18.5rem, calc(100vw - 2rem));
+}
+
+.emoji-picker-el {
+    display: block;
+    width: 100%;
+    height: min(16.5rem, 45vh);
+    --border-size: 0;
+    --border-radius: 0;
+    --emoji-size: 1.35rem;
+    --num-columns: 7;
+    --category-emoji-size: 1.15rem;
+    --input-font-size: 0.85rem;
+    --emoji-font-family:
+        "Twemoji Mozilla", "Twemoji Country Flags", "Apple Color Emoji",
+        "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+}
+
+@media (max-width: 400px) {
+    .emoji-picker-shell {
+        width: min(16.5rem, calc(100vw - 1.25rem));
+    }
+
+    .emoji-picker-el {
+        height: min(14.5rem, 42vh);
+        --num-columns: 6;
+        --emoji-size: 1.25rem;
+    }
 }

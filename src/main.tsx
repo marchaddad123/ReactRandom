@@ -1,9 +1,21 @@
+import { polyfillCountryFlagEmojis } from "country-flag-emoji-polyfill"
+import lazySizes from "lazysizes"
 import { StrictMode } from "react"
-import { createRoot } from "react-dom/client"
+import { createRoot, type Root } from "react-dom/client"
 import { BrowserRouter } from "react-router-dom"
 import App from "./App.tsx"
 import { AuthBootstrap } from "./components/AuthBootstrap"
 import "./index.css"
+
+/*
+ * Flag emoji polyfill (Windows etc.): loads "Twemoji Country Flags".
+ * emoji-picker-element / body text then fall back through the emoji font stack
+ * in index.css (--font-sans), same approach as the Nuxt app.
+ */
+polyfillCountryFlagEmojis("Twemoji Mozilla")
+
+// Ready for lazy-loaded images later: <img class="lazyload" data-src="..." />
+lazySizes.cfg.expand = 100
 
 /*
  * =============================================================================
@@ -54,15 +66,24 @@ import "./index.css"
  * -----------------------------------------------------------------------------
  *
  *   /login, /register  → public (anyone)
- *   /, /:username       → ProtectedRoute: must have store.user, else → /login
- *   /profile            → shortcut that redirects to /your-username
+ *   /, /:username, /:username/posts → ProtectedRoute (must be logged in)
+ *   /profile                        → shortcut that redirects to /your-username
  *
  *   Zustand (useAuthStore) is the app's memory of "logged in or not".
  *   Firebase is the source of truth; Zustand just mirrors it for React.
  * =============================================================================
  */
 
-createRoot(document.getElementById("root")!).render(
+const container = document.getElementById("root")!
+// Reuse the root on Vite HMR so we do not call createRoot() twice on #root.
+const root: Root =
+    (import.meta.hot?.data.root as Root | undefined) ?? createRoot(container)
+
+if (import.meta.hot) {
+    import.meta.hot.data.root = root
+}
+
+root.render(
     <StrictMode>
         {/* URLs like /login and /profile */}
         <BrowserRouter>

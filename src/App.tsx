@@ -4,7 +4,9 @@ import { ProtectedRoute } from "./components/ProtectedRoute"
 import { cx, ui } from "./lib/ui"
 import { HomePage } from "./pages/HomePage"
 import { LoginPage } from "./pages/LoginPage"
-import { ProfilePage } from "./pages/ProfilePage"
+import { ProfileAboutPage } from "./pages/profile/ProfileAboutPage"
+import { ProfileLayout } from "./pages/profile/ProfileLayout"
+import { ProfilePostsPage } from "./pages/profile/ProfilePostsPage"
 import { ProfileRedirect } from "./pages/ProfileRedirect"
 import { RegisterPage } from "./pages/RegisterPage"
 import { useAuthStore } from "./store/useAuthStore"
@@ -163,11 +165,20 @@ function App() {
                             path="/profile"
                             element={<ProfileRedirect />}
                         />
-                        {/* Public-within-app profile pages: /ada, /bob, … */}
+                        {/* /:username (About) and /:username/posts */}
                         <Route
                             path="/:username"
-                            element={<ProfilePage />}
-                        />
+                            element={<ProfileLayout />}
+                        >
+                            <Route
+                                index
+                                element={<ProfileAboutPage />}
+                            />
+                            <Route
+                                path="posts"
+                                element={<ProfilePostsPage />}
+                            />
+                        </Route>
                     </Route>
                 </Route>
 
