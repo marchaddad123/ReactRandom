@@ -31,6 +31,12 @@ service cloud.firestore {
         allow read: if request.auth != null;
         allow create, update, delete: if request.auth != null
           && request.auth.uid == userId;
+
+        match /likes/{likerUid} {
+          allow read: if request.auth != null;
+          allow create, delete: if request.auth != null
+            && request.auth.uid == likerUid;
+        }
       }
     }
   }
@@ -54,14 +60,14 @@ Vite inlines `VITE_*` at **build** time. `.env.local` is gitignored and is
 In Vercel → Project → **Settings → Environment Variables**, add the same keys
 for Production (and Preview if you want):
 
-| Name | Example |
-|------|---------|
-| `VITE_FIREBASE_API_KEY` | from Firebase |
-| `VITE_FIREBASE_AUTH_DOMAIN` | `reactrandom.firebaseapp.com` |
-| `VITE_FIREBASE_PROJECT_ID` | `reactrandom` |
-| `VITE_FIREBASE_STORAGE_BUCKET` | `….firebasestorage.app` |
-| `VITE_FIREBASE_MESSAGING_SENDER_ID` | numbers |
-| `VITE_FIREBASE_APP_ID` | `1:…:web:…` |
+| Name                                | Example                       |
+| ----------------------------------- | ----------------------------- |
+| `VITE_FIREBASE_API_KEY`             | from Firebase                 |
+| `VITE_FIREBASE_AUTH_DOMAIN`         | `reactrandom.firebaseapp.com` |
+| `VITE_FIREBASE_PROJECT_ID`          | `reactrandom`                 |
+| `VITE_FIREBASE_STORAGE_BUCKET`      | `….firebasestorage.app`       |
+| `VITE_FIREBASE_MESSAGING_SENDER_ID` | numbers                       |
+| `VITE_FIREBASE_APP_ID`              | `1:…:web:…`                   |
 
 Then **Redeploy** so the new build picks them up.
 

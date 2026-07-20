@@ -16,6 +16,7 @@
     },
     "dependencies": {
         "@heroicons/react": "^2.2.0",
+        "canvas-confetti": "^1.9.4",
         "country-flag-emoji-polyfill": "^0.1.8",
         "emoji-picker-element": "^1.29.1",
         "firebase": "^12.16.0",
@@ -29,6 +30,7 @@
     "devDependencies": {
         "@eslint/js": "^10.0.1",
         "@tailwindcss/vite": "^4.3.2",
+        "@types/canvas-confetti": "^1.9.0",
         "@types/node": "^24.13.2",
         "@types/react": "^19.2.17",
         "@types/react-dom": "^19.2.3",

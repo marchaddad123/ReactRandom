@@ -1,8 +1,10 @@
 import { type FormEvent, useEffect, useState } from "react"
 import { useOutletContext } from "react-router-dom"
 import { EmojiTextarea } from "../../components/EmojiTextarea"
+import { PostLikeButton } from "../../components/PostLikeButton"
 import { createPost, listPostsForUser } from "../../lib/posts"
 import { cx, ui } from "../../lib/ui"
+import { useAuthStore } from "../../store/useAuthStore"
 import { useNotificationStore } from "../../store/useNotificationStore"
 import { POST_MAX_LENGTH, type Post } from "../../types/post"
 import { formatDate, type ProfileOutletContext } from "./profileHelpers"
@@ -10,6 +12,7 @@ import { formatDate, type ProfileOutletContext } from "./profileHelpers"
 /** /:username/posts — list posts; compose form if this is your profile. */
 export function ProfilePostsPage() {
     const { profile, isOwn } = useOutletContext<ProfileOutletContext>()
+    const viewerUid = useAuthStore((state) => state.user?.uid ?? null)
     const notify = useNotificationStore((state) => state.updateNotification)
 
     const [posts, setPosts] = useState<Post[]>([])
@@ -22,7 +25,7 @@ export function ProfilePostsPage() {
 
         async function load() {
             setLoading(true)
-            const list = await listPostsForUser(profile.uid)
+            const list = await listPostsForUser(profile.uid, viewerUid)
             if (!cancelled) {
                 setPosts(list)
                 setLoading(false)
@@ -33,7 +36,7 @@ export function ProfilePostsPage() {
         return () => {
             cancelled = true
         }
-    }, [profile.uid])
+    }, [profile.uid, viewerUid])
 
     async function handleSubmit(event: FormEvent) {
         event.preventDefault()
@@ -64,6 +67,17 @@ export function ProfilePostsPage() {
         } finally {
             setSaving(false)
         }
+    }
+
+    function updatePostLikes(
+        postId: string,
+        next: Pick<Post, "likeCount" | "likedByMe">
+    ) {
+        setPosts((current) =>
+            current.map((post) =>
+                post.id === postId ? { ...post, ...next } : post
+            )
+        )
     }
 
     return (
@@ -137,9 +151,20 @@ export function ProfilePostsPage() {
                                 <p className="text-ink m-0 whitespace-pre-wrap">
                                     {post.body}
                                 </p>
-                                <p className="text-muted mt-2 mb-0 text-xs">
-                                    {formatDate(post.createdAt)}
-                                </p>
+                                <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                                    <p className="text-muted m-0 text-xs">
+                                        {formatDate(post.createdAt)}
+                                    </p>
+                                    {viewerUid ? (
+                                        <PostLikeButton
+                                            post={post}
+                                            likerUid={viewerUid}
+                                            onChange={(next) =>
+                                                updatePostLikes(post.id, next)
+                                            }
+                                        />
+                                    ) : null}
+                                </div>
                             </li>
                         ))}
                     </ul>
