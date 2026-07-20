@@ -239,7 +239,7 @@ export function PostDetailModal({
                         </p>
                     ) : null}
                     {!loading && tree.length > 0 ? (
-                        <ul className="comment-thread m-0 mt-2 list-none space-y-1 p-0">
+                        <ul className="comment-thread m-0 mt-2 list-none p-0">
                             {tree.map((node) => (
                                 <CommentThread
                                     key={node.id}

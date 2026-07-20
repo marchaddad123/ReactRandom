@@ -13,6 +13,7 @@ import {
     type CommentVote
 } from "../types/comment"
 import { CommentVoteColumn } from "./CommentVoteColumn"
+import { CommentThreadRail } from "./CommentThreadRail"
 import { voteGutterClass } from "./commentLayout"
 import { EmojiTextarea } from "./EmojiTextarea"
 
@@ -30,9 +31,8 @@ type CommentThreadProps = {
 }
 
 /**
- * Reddit-style thread: one rail step per level.
- * Children sit under the whole row (votes + body), not inside the text column —
- * so reply-to-reply doesn’t jump far right.
+ * Reddit-style thread: rail aligns with vote column; one nest step per level.
+ * Vertical rhythm uses --comment-gap equally above replies and between threads.
  */
 export function CommentThread({
     node,
@@ -127,35 +127,18 @@ export function CommentThread({
         }
     }
 
-    const rail =
-        depth > 0 ? (
-            <button
-                type="button"
-                className={cx(
-                    voteGutterClass,
-                    "group relative cursor-pointer self-stretch border-0 bg-transparent p-0"
-                )}
-                aria-label="Collapse thread"
-                title="Collapse thread"
-                onClick={() => setCollapsed(true)}
-            >
-                <span className="bg-line group-hover:bg-upvote absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 rounded-full transition-colors" />
-            </button>
-        ) : null
-
     if (collapsed) {
         return (
             <li className="m-0 flex list-none">
-                {rail ??
-                    (depth > 0 ? (
-                        <span
-                            className={voteGutterClass}
-                            aria-hidden
-                        />
-                    ) : null)}
+                {depth > 0 ? (
+                    <span
+                        className={voteGutterClass}
+                        aria-hidden
+                    />
+                ) : null}
                 <button
                     type="button"
-                    className="text-muted hover:text-ink inline-flex min-h-10 cursor-pointer items-center gap-1.5 border-0 bg-transparent p-0 py-2 text-xs sm:min-h-0 sm:py-1"
+                    className="text-muted hover:text-ink inline-flex cursor-pointer items-center gap-1.5 border-0 bg-transparent p-0 text-xs"
                     onClick={() => setCollapsed(false)}
                 >
                     <span className="text-upvote font-medium">[+]</span>
@@ -184,10 +167,13 @@ export function CommentThread({
     }
 
     return (
-        <li className="m-0 flex list-none">
-            {rail}
-            <div className="min-w-0 flex-1">
-                <div className="flex gap-1 sm:gap-1.5">
+        <li className="m-0 list-none">
+            <div className="flex">
+                <CommentThreadRail
+                    depth={depth}
+                    onCollapse={() => setCollapsed(true)}
+                />
+                <div className="flex min-w-0 flex-1 gap-1 sm:gap-1.5">
                     <CommentVoteColumn
                         score={node.score}
                         myVote={node.myVote}
@@ -196,7 +182,7 @@ export function CommentThread({
                         onDown={() => void handleVote(-1)}
                     />
 
-                    <div className="min-w-0 flex-1 overflow-hidden pb-1.5">
+                    <div className="min-w-0 flex-1 overflow-hidden">
                         <div className="text-muted flex flex-wrap items-center gap-x-1 text-xs leading-snug">
                             {hasChildren ? (
                                 <button
@@ -226,11 +212,11 @@ export function CommentThread({
                             {node.body}
                         </p>
 
-                        <div className="text-muted mt-0.5 flex flex-wrap items-center gap-x-1 text-[0.7rem] font-medium tracking-wide uppercase sm:mt-1 sm:gap-x-3 sm:text-[0.65rem]">
+                        <div className="text-muted mt-1 flex flex-wrap items-center gap-x-3 text-[0.7rem] font-medium tracking-wide uppercase sm:text-[0.65rem]">
                             {viewerUid ? (
                                 <button
                                     type="button"
-                                    className="hover:text-ink inline-flex min-h-10 cursor-pointer items-center border-0 bg-transparent px-1 py-2 sm:min-h-0 sm:px-0 sm:py-0"
+                                    className="hover:text-ink inline-flex cursor-pointer items-center border-0 bg-transparent p-0"
                                     onClick={() => setReplying((r) => !r)}
                                 >
                                     {replying ? "Cancel" : "Reply"}
@@ -239,7 +225,7 @@ export function CommentThread({
                             {viewerUid === node.authorUid ? (
                                 <button
                                     type="button"
-                                    className="hover:text-danger inline-flex min-h-10 cursor-pointer items-center border-0 bg-transparent px-1 py-2 sm:min-h-0 sm:px-0 sm:py-0"
+                                    className="hover:text-danger inline-flex cursor-pointer items-center border-0 bg-transparent p-0"
                                     disabled={deleting}
                                     onClick={() => void handleDelete()}
                                 >
@@ -291,9 +277,18 @@ export function CommentThread({
                         ) : null}
                     </div>
                 </div>
+            </div>
 
-                {hasChildren ? (
-                    <ul className="m-0 mt-0.5 list-none space-y-0 p-0">
+            {hasChildren ? (
+                <div className="comment-replies">
+                    {/* Keep deeper rails under this level’s vote column */}
+                    {depth > 0 ? (
+                        <div
+                            className={voteGutterClass}
+                            aria-hidden
+                        />
+                    ) : null}
+                    <ul className="comment-replies-list">
                         {node.children.map((child) => (
                             <CommentThread
                                 key={child.id}
@@ -307,8 +302,8 @@ export function CommentThread({
                             />
                         ))}
                     </ul>
-                ) : null}
-            </div>
+                </div>
+            ) : null}
         </li>
     )
 }

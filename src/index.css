@@ -259,4 +259,26 @@ html:has([data-modal-ui]) {
     overscroll-behavior: none;
 }
 
-/* Comment nest: rail gutter matches vote column (see voteGutterClass) */
+/* Comment thread — equal gap above replies, between siblings, and before next thread */
+.comment-thread {
+    --comment-gap: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: var(--comment-gap);
+}
+
+.comment-replies {
+    display: flex;
+    margin-top: var(--comment-gap);
+}
+
+.comment-replies-list {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    flex-direction: column;
+    gap: var(--comment-gap);
+    margin: 0;
+    list-style: none;
+    padding: 0;
+}
