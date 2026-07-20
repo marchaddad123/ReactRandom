@@ -20,6 +20,3 @@ export type CommentNode = Comment & {
 }
 
 export const COMMENT_MAX_LENGTH = 1000
-
-/** Visual indent stops increasing past this depth (data can nest deeper). */
-export const COMMENT_MAX_INDENT = 5

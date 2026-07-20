@@ -259,15 +259,4 @@ html:has([data-modal-ui]) {
     overscroll-behavior: none;
 }
 
-/* Reddit-style comment nest indent — tighter on phones */
-.comment-thread {
-    --comment-indent-step: 0.85rem;
-    --comment-indent-cap: 4.25rem;
-}
-
-@media (max-width: 639px) {
-    .comment-thread {
-        --comment-indent-step: 0.4rem;
-        --comment-indent-cap: 1.2rem;
-    }
-}
+/* Comment nest: rail gutter matches vote column (see voteGutterClass) */

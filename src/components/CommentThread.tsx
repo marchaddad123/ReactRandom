@@ -8,12 +8,12 @@ import {
 import { cx, ui } from "../lib/ui"
 import { useNotificationStore } from "../store/useNotificationStore"
 import {
-    COMMENT_MAX_INDENT,
     COMMENT_MAX_LENGTH,
     type CommentNode,
     type CommentVote
 } from "../types/comment"
 import { CommentVoteColumn } from "./CommentVoteColumn"
+import { voteGutterClass } from "./commentLayout"
 import { EmojiTextarea } from "./EmojiTextarea"
 
 type CommentThreadProps = {
@@ -29,7 +29,11 @@ type CommentThreadProps = {
     ) => void
 }
 
-/** Classic Reddit-style comment: vote column, meta row, rail collapse. */
+/**
+ * Reddit-style thread: one rail step per level.
+ * Children sit under the whole row (votes + body), not inside the text column —
+ * so reply-to-reply doesn’t jump far right.
+ */
 export function CommentThread({
     node,
     depth,
@@ -47,18 +51,9 @@ export function CommentThread({
     const [deleting, setDeleting] = useState(false)
     const [voting, setVoting] = useState(false)
 
-    const indent = Math.min(depth, COMMENT_MAX_INDENT)
     const childCount = countCommentDescendants(node)
     const hasChildren = node.children.length > 0
-    const nestStyle =
-        indent > 0
-            ? {
-                  marginLeft: `min(
-                      calc(${indent} * var(--comment-indent-step)),
-                      var(--comment-indent-cap)
-                  )`
-              }
-            : undefined
+
     async function handleVote(next: CommentVote) {
         if (!viewerUid || voting) return
         const prev = { score: node.score, myVote: node.myVote }
@@ -132,12 +127,32 @@ export function CommentThread({
         }
     }
 
+    const rail =
+        depth > 0 ? (
+            <button
+                type="button"
+                className={cx(
+                    voteGutterClass,
+                    "group relative cursor-pointer self-stretch border-0 bg-transparent p-0"
+                )}
+                aria-label="Collapse thread"
+                title="Collapse thread"
+                onClick={() => setCollapsed(true)}
+            >
+                <span className="bg-line group-hover:bg-upvote absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 rounded-full transition-colors" />
+            </button>
+        ) : null
+
     if (collapsed) {
         return (
-            <li
-                className="m-0 list-none"
-                style={nestStyle}
-            >
+            <li className="m-0 flex list-none">
+                {rail ??
+                    (depth > 0 ? (
+                        <span
+                            className={voteGutterClass}
+                            aria-hidden
+                        />
+                    ) : null)}
                 <button
                     type="button"
                     className="text-muted hover:text-ink inline-flex min-h-10 cursor-pointer items-center gap-1.5 border-0 bg-transparent p-0 py-2 text-xs sm:min-h-0 sm:py-1"
@@ -169,142 +184,130 @@ export function CommentThread({
     }
 
     return (
-        <li
-            className="m-0 flex list-none gap-0"
-            style={nestStyle}
-        >
-            {depth > 0 ? (
-                <button
-                    type="button"
-                    className="group relative mr-1.5 w-4 shrink-0 cursor-pointer self-stretch border-0 bg-transparent p-0 sm:mr-2 sm:w-3"
-                    aria-label="Collapse thread"
-                    title="Collapse thread"
-                    onClick={() => setCollapsed(true)}
-                >
-                    <span className="bg-line group-hover:bg-upvote absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 rounded-full transition-colors" />
-                </button>
-            ) : null}
+        <li className="m-0 flex list-none">
+            {rail}
+            <div className="min-w-0 flex-1">
+                <div className="flex gap-1 sm:gap-1.5">
+                    <CommentVoteColumn
+                        score={node.score}
+                        myVote={node.myVote}
+                        disabled={!viewerUid || voting}
+                        onUp={() => void handleVote(1)}
+                        onDown={() => void handleVote(-1)}
+                    />
 
-            <div className="flex min-w-0 flex-1 gap-1 sm:gap-1.5">
-                <CommentVoteColumn
-                    score={node.score}
-                    myVote={node.myVote}
-                    disabled={!viewerUid || voting}
-                    onUp={() => void handleVote(1)}
-                    onDown={() => void handleVote(-1)}
-                />
-
-                <div className="min-w-0 flex-1 overflow-hidden pb-2">
-                    <div className="text-muted flex flex-wrap items-center gap-x-1 text-xs leading-snug">
-                        {hasChildren ? (
-                            <button
-                                type="button"
-                                className="text-muted hover:text-ink inline-flex min-h-8 min-w-8 cursor-pointer items-center justify-center border-0 bg-transparent p-0 font-medium sm:min-h-0 sm:min-w-0"
-                                aria-label="Collapse thread"
-                                onClick={() => setCollapsed(true)}
-                            >
-                                [–]
-                            </button>
-                        ) : null}
-                        <span className="text-ink font-medium">
-                            {node.authorUsername}
-                        </span>
-                        <span aria-hidden>·</span>
-                        <span>
-                            {formatScore(node.score)}{" "}
-                            {formatPointsLabel(node.score)}
-                        </span>
-                        <span aria-hidden>·</span>
-                        <time dateTime={node.createdAt}>
-                            {formatRelativeTime(node.createdAt)}
-                        </time>
-                    </div>
-
-                    <p className="text-ink m-0 mt-0.5 text-sm leading-snug break-words whitespace-pre-wrap">
-                        {node.body}
-                    </p>
-
-                    <div className="text-muted mt-0.5 flex flex-wrap items-center gap-x-1 text-[0.7rem] font-medium tracking-wide uppercase sm:mt-1 sm:gap-x-3 sm:text-[0.65rem]">
-                        {viewerUid ? (
-                            <button
-                                type="button"
-                                className="hover:text-ink inline-flex min-h-10 cursor-pointer items-center border-0 bg-transparent px-1 py-2 sm:min-h-0 sm:px-0 sm:py-0"
-                                onClick={() => setReplying((r) => !r)}
-                            >
-                                {replying ? "Cancel" : "Reply"}
-                            </button>
-                        ) : null}
-                        {viewerUid === node.authorUid ? (
-                            <button
-                                type="button"
-                                className="hover:text-danger inline-flex min-h-10 cursor-pointer items-center border-0 bg-transparent px-1 py-2 sm:min-h-0 sm:px-0 sm:py-0"
-                                disabled={deleting}
-                                onClick={() => void handleDelete()}
-                            >
-                                {deleting ? "Deleting…" : "Delete"}
-                            </button>
-                        ) : null}
-                    </div>
-
-                    {replying ? (
-                        <form
-                            className="mt-2 space-y-2"
-                            onSubmit={handleReplySubmit}
-                        >
-                            <EmojiTextarea
-                                value={replyBody}
-                                onChange={setReplyBody}
-                                maxLength={COMMENT_MAX_LENGTH}
-                                placeholder={`Reply to ${node.authorUsername}…`}
-                                className="mt-0 min-h-[4rem] text-sm"
-                            />
-                            <div className="flex items-center justify-end gap-2">
+                    <div className="min-w-0 flex-1 overflow-hidden pb-1.5">
+                        <div className="text-muted flex flex-wrap items-center gap-x-1 text-xs leading-snug">
+                            {hasChildren ? (
                                 <button
                                     type="button"
-                                    className={cx(
-                                        ui.btn,
-                                        ui.btnGhost,
-                                        "px-3 py-1.5 text-sm"
-                                    )}
-                                    onClick={() => {
-                                        setReplying(false)
-                                        setReplyBody("")
-                                    }}
+                                    className="text-muted hover:text-ink inline-flex min-h-8 min-w-8 cursor-pointer items-center justify-center border-0 bg-transparent p-0 font-medium sm:min-h-0 sm:min-w-0"
+                                    aria-label="Collapse thread"
+                                    onClick={() => setCollapsed(true)}
                                 >
-                                    Cancel
+                                    [–]
                                 </button>
-                                <button
-                                    type="submit"
-                                    className={cx(
-                                        ui.btn,
-                                        ui.btnPrimary,
-                                        "px-3 py-1.5 text-sm"
-                                    )}
-                                    disabled={saving || !replyBody.trim()}
-                                >
-                                    {saving ? "Posting…" : "Reply"}
-                                </button>
-                            </div>
-                        </form>
-                    ) : null}
+                            ) : null}
+                            <span className="text-ink font-medium">
+                                {node.authorUsername}
+                            </span>
+                            <span aria-hidden>·</span>
+                            <span>
+                                {formatScore(node.score)}{" "}
+                                {formatPointsLabel(node.score)}
+                            </span>
+                            <span aria-hidden>·</span>
+                            <time dateTime={node.createdAt}>
+                                {formatRelativeTime(node.createdAt)}
+                            </time>
+                        </div>
 
-                    {hasChildren ? (
-                        <ul className="m-0 mt-1 list-none space-y-0 p-0">
-                            {node.children.map((child) => (
-                                <CommentThread
-                                    key={child.id}
-                                    node={child}
-                                    depth={depth + 1}
-                                    postAuthorUid={postAuthorUid}
-                                    viewerUid={viewerUid}
-                                    onReply={onReply}
-                                    onDelete={onDelete}
-                                    onVoteChange={onVoteChange}
+                        <p className="text-ink m-0 mt-0.5 text-sm leading-snug break-words whitespace-pre-wrap">
+                            {node.body}
+                        </p>
+
+                        <div className="text-muted mt-0.5 flex flex-wrap items-center gap-x-1 text-[0.7rem] font-medium tracking-wide uppercase sm:mt-1 sm:gap-x-3 sm:text-[0.65rem]">
+                            {viewerUid ? (
+                                <button
+                                    type="button"
+                                    className="hover:text-ink inline-flex min-h-10 cursor-pointer items-center border-0 bg-transparent px-1 py-2 sm:min-h-0 sm:px-0 sm:py-0"
+                                    onClick={() => setReplying((r) => !r)}
+                                >
+                                    {replying ? "Cancel" : "Reply"}
+                                </button>
+                            ) : null}
+                            {viewerUid === node.authorUid ? (
+                                <button
+                                    type="button"
+                                    className="hover:text-danger inline-flex min-h-10 cursor-pointer items-center border-0 bg-transparent px-1 py-2 sm:min-h-0 sm:px-0 sm:py-0"
+                                    disabled={deleting}
+                                    onClick={() => void handleDelete()}
+                                >
+                                    {deleting ? "Deleting…" : "Delete"}
+                                </button>
+                            ) : null}
+                        </div>
+
+                        {replying ? (
+                            <form
+                                className="mt-2 space-y-2"
+                                onSubmit={handleReplySubmit}
+                            >
+                                <EmojiTextarea
+                                    value={replyBody}
+                                    onChange={setReplyBody}
+                                    maxLength={COMMENT_MAX_LENGTH}
+                                    placeholder={`Reply to ${node.authorUsername}…`}
+                                    className="mt-0 min-h-[4rem] text-sm"
                                 />
-                            ))}
-                        </ul>
-                    ) : null}
+                                <div className="flex items-center justify-end gap-2">
+                                    <button
+                                        type="button"
+                                        className={cx(
+                                            ui.btn,
+                                            ui.btnGhost,
+                                            "px-3 py-1.5 text-sm"
+                                        )}
+                                        onClick={() => {
+                                            setReplying(false)
+                                            setReplyBody("")
+                                        }}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className={cx(
+                                            ui.btn,
+                                            ui.btnPrimary,
+                                            "px-3 py-1.5 text-sm"
+                                        )}
+                                        disabled={saving || !replyBody.trim()}
+                                    >
+                                        {saving ? "Posting…" : "Reply"}
+                                    </button>
+                                </div>
+                            </form>
+                        ) : null}
+                    </div>
                 </div>
+
+                {hasChildren ? (
+                    <ul className="m-0 mt-0.5 list-none space-y-0 p-0">
+                        {node.children.map((child) => (
+                            <CommentThread
+                                key={child.id}
+                                node={child}
+                                depth={depth + 1}
+                                postAuthorUid={postAuthorUid}
+                                viewerUid={viewerUid}
+                                onReply={onReply}
+                                onDelete={onDelete}
+                                onVoteChange={onVoteChange}
+                            />
+                        ))}
+                    </ul>
+                ) : null}
             </div>
         </li>
     )

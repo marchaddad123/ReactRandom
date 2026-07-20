@@ -2,6 +2,7 @@ import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/24/solid"
 import { formatScore } from "../lib/format"
 import { cx } from "../lib/ui"
 import type { CommentVote } from "../types/comment"
+import { voteGutterClass } from "./commentLayout"
 
 type CommentVoteColumnProps = {
     score: number
@@ -20,7 +21,12 @@ export function CommentVoteColumn({
     onDown
 }: CommentVoteColumnProps) {
     return (
-        <div className="flex w-8 shrink-0 flex-col items-center sm:w-6 sm:pt-0.5">
+        <div
+            className={cx(
+                voteGutterClass,
+                "flex flex-col items-center sm:pt-0.5"
+            )}
+        >
             <button
                 type="button"
                 className={cx(
