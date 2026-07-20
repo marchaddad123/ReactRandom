@@ -20,8 +20,7 @@ export const ui = {
     actions: "mt-5 flex flex-wrap gap-2.5",
     btn: "inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-transparent px-4 py-2.5 text-[0.9rem] leading-tight font-semibold transition-[background,color,border-color,transform] active:enabled:translate-y-px disabled:cursor-not-allowed disabled:opacity-50",
     btnPrimary: "bg-primary text-primary-fg hover:enabled:bg-primary/90",
-    btnSecondary:
-        "border-line bg-white text-ink hover:enabled:bg-tertiary",
+    btnSecondary: "border-line bg-white text-ink hover:enabled:bg-tertiary",
     btnGoogle:
         "border-ink/20 bg-white text-ink shadow-sm hover:enabled:bg-tertiary/60",
     btnGhost:

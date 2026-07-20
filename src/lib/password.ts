@@ -7,12 +7,7 @@ export const PASSWORD_MIN_LENGTH = 8
 export const PASSWORD_MAX_LENGTH = 64
 
 export type PasswordRuleId =
-    | "minLength"
-    | "maxLength"
-    | "lowercase"
-    | "uppercase"
-    | "number"
-    | "symbol"
+    "minLength" | "maxLength" | "lowercase" | "uppercase" | "number" | "symbol"
 
 export type PasswordRule = {
     id: PasswordRuleId
